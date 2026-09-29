@@ -377,18 +377,18 @@ def render_network_map(
 
     function show(node) {{
       const view = currentView(node);
-      details.innerHTML = `<h2>${node.name}</h2>
-        <p><strong>Institution:</strong> ${node.institution || "Unknown"}</p>
-        <p><strong>Department:</strong> ${node.department || "Unknown"}</p>
-        <p><strong>Location:</strong> ${node.location || "Unknown"}</p>
-        <p><strong>${data.views[currentMode].label}:</strong> ${view.group}</p>
-        <p><strong>Keywords:</strong> ${node.keywords.join(", ") || "None yet"}</p>`;
+      details.innerHTML = `<h2>${{node.name}}</h2>
+        <p><strong>Institution:</strong> ${{node.institution || "Unknown"}}</p>
+        <p><strong>Department:</strong> ${{node.department || "Unknown"}}</p>
+        <p><strong>Location:</strong> ${{node.location || "Unknown"}}</p>
+        <p><strong>${{data.views[currentMode].label}}:</strong> ${{view.group}}</p>
+        <p><strong>Keywords:</strong> ${{node.keywords.join(", ") || "None yet"}}</p>`;
     }}
 
     function applyTransform() {{
       viewport.setAttribute(
         "transform",
-        `translate(${transform.x} ${transform.y}) scale(${transform.scale})`
+        `translate(${{transform.x}} ${{transform.y}}) scale(${{transform.scale}})`
       );
     }}
 
