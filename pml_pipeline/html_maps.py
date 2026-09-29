@@ -73,6 +73,25 @@ def build_nodes(people: list[Person], group_by: str) -> list[dict]:
     return nodes
 
 
+def relation_category(edge_type: str) -> str:
+    normalized = edge_type.strip().lower().replace("-", "_").replace(" ", "_")
+    if normalized in {"coauthor", "collaboration", "collaborator", "co_investigator", "co_pi"}:
+        return "collaboration"
+    if normalized in {
+        "hierarchy",
+        "supervisor",
+        "supervisee",
+        "advisor",
+        "advisee",
+        "pi_member",
+        "group_leader_member",
+        "mentor",
+        "mentee",
+    }:
+        return "hierarchy"
+    return "context"
+
+
 def build_links(people: list[Person], edges: list[Edge]) -> list[dict]:
     visible_ids = {person.person_id for person in people}
     return [
@@ -80,6 +99,7 @@ def build_links(people: list[Person], edges: list[Edge]) -> list[dict]:
             "source": edge.normalized().source_person_id,
             "target": edge.normalized().target_person_id,
             "type": edge.edge_type,
+            "category": relation_category(edge.edge_type),
             "weight": edge.weight,
             "evidence": edge.evidence_text,
         }
@@ -162,6 +182,14 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
     .node { cursor: pointer; stroke: #fff; stroke-width: 1.8; vector-effect: non-scaling-stroke; }
     .node:hover { stroke: #18202b; stroke-width: 2.3; }
     .link { stroke: #9aa6b2; stroke-opacity: .45; vector-effect: non-scaling-stroke; }
+    .link.relation-collaboration { stroke: #356d9f; stroke-opacity: .95; }
+    .link.relation-hierarchy { stroke: #b77928; stroke-opacity: .95; stroke-dasharray: 7 4; }
+    .node.selected { stroke: #111827; stroke-width: 3; }
+    .relation-toggle { display: flex; align-items: center; gap: 8px; padding: 10px 0; margin: 10px 0; border-top: 1px solid #eceff3; border-bottom: 1px solid #eceff3; }
+    .relation-toggle input { min-height: 0; }
+    .relation-legend { display: grid; gap: 6px; margin: 8px 0 12px; font-size: 12px; color: var(--muted); }
+    .legend-line { display: inline-block; width: 28px; height: 0; margin-right: 7px; vertical-align: middle; border-top: 3px solid #356d9f; }
+    .legend-line.hierarchy { border-top-color: #b77928; border-top-style: dashed; }
     .label { font-size: 11px; pointer-events: auto; cursor: pointer; fill: #253040; paint-order: stroke; stroke: #fbfcfd; stroke-width: 3px; stroke-linejoin: round; }
     .muted { color: var(--muted); }
     .status { font-size: 12px; color: var(--muted); }
@@ -292,12 +320,31 @@ let mode = "institution";
 let transform = {x: 0, y: 0, k: 1};
 let dragging = false;
 let lastPointer = null;
+let selectedNodeId = null;
+let relationsOnly = false;
 
 function currentView() { return data.views[mode]; }
 function currentNodeMap() { return new Map(currentView().nodes.map(node => [node.id, node])); }
 function color(group) {
   const index = Math.abs([...group].reduce((total, char) => total + char.charCodeAt(0), 0)) % palette.length;
   return palette[index];
+}
+function relationLinksFor(personId) {
+  return data.links.filter(link =>
+    link.category !== "context" &&
+    (link.source === personId || link.target === personId)
+  );
+}
+function visibleNodesForState() {
+  if (relationsOnly && selectedNodeId) {
+    const ids = new Set([selectedNodeId]);
+    relationLinksFor(selectedNodeId).forEach(link => {
+      ids.add(link.source);
+      ids.add(link.target);
+    });
+    return currentView().nodes.filter(node => ids.has(node.id));
+  }
+  return currentView().nodes.filter(matches);
 }
 function matches(node) {
   const selected = groupFilter.value;
@@ -321,7 +368,7 @@ function zoomBy(factor, centerX = 500, centerY = 360) {
   applyTransform();
 }
 function fitVisible() {
-  const visibleNodes = currentView().nodes.filter(matches);
+  const visibleNodes = visibleNodesForState();
   if (!visibleNodes.length) return;
   const xs = visibleNodes.map(node => node.x);
   const ys = visibleNodes.map(node => node.y);
@@ -347,11 +394,14 @@ function draw() {
   viewport.innerHTML = "";
   const view = currentView();
   const nodeById = currentNodeMap();
-  const visibleNodes = view.nodes.filter(matches);
+  const visibleNodes = visibleNodesForState();
   const visible = new Set(visibleNodes.map(node => node.id));
-  visibleStatus.textContent = `${visibleNodes.length} / ${view.nodes.length} people`;
+  visibleStatus.textContent = relationsOnly && selectedNodeId
+    ? `${Math.max(0, visibleNodes.length - 1)} direct relations`
+    : `${visibleNodes.length} / ${view.nodes.length} people`;
 
-  for (const link of data.links) {
+  const linksToDraw = relationsOnly && selectedNodeId ? relationLinksFor(selectedNodeId) : data.links;
+  for (const link of linksToDraw) {
     if (!visible.has(link.source) || !visible.has(link.target)) continue;
     const source = nodeById.get(link.source);
     const target = nodeById.get(link.target);
@@ -360,6 +410,8 @@ function draw() {
     line.setAttribute("x1", source.x); line.setAttribute("y1", source.y);
     line.setAttribute("x2", target.x); line.setAttribute("y2", target.y);
     line.setAttribute("class", "link");
+    if (relationsOnly && link.category === "collaboration") line.classList.add("relation-collaboration");
+    if (relationsOnly && link.category === "hierarchy") line.classList.add("relation-hierarchy");
     line.setAttribute("stroke-width", Math.max(0.8, Math.min(4, link.weight)));
     viewport.appendChild(line);
   }
@@ -369,6 +421,7 @@ function draw() {
     circle.setAttribute("cx", node.x); circle.setAttribute("cy", node.y);
     circle.setAttribute("r", 8); circle.setAttribute("fill", color(node.group));
     circle.setAttribute("class", "node");
+    if (node.id === selectedNodeId) circle.classList.add("selected");
     circle.addEventListener("pointerdown", event => event.stopPropagation());
     circle.addEventListener("click", event => { event.stopPropagation(); show(node); });
     viewport.appendChild(circle);
@@ -384,9 +437,21 @@ function draw() {
   applyTransform();
 }
 function show(node) {
+  selectedNodeId = node.id;
   const profile = node.profile_url ? `<p><a href="${node.profile_url}" target="_blank" rel="noopener">Open profile</a></p>` : "";
   const email = node.email ? `<p><strong>Email:</strong> ${node.email}</p>` : "";
+  const relations = relationLinksFor(node.id);
+  const collaborationCount = relations.filter(link => link.category === "collaboration").length;
+  const hierarchyCount = relations.filter(link => link.category === "hierarchy").length;
   details.innerHTML = `<h2>${node.name}</h2>
+    <label class="relation-toggle">
+      <input id="relationsToggle" type="checkbox" ${relationsOnly ? "checked" : ""}>
+      <strong>Relations only</strong>
+    </label>
+    <div class="relation-legend">
+      <span><span class="legend-line"></span>Collaboration (${collaborationCount})</span>
+      <span><span class="legend-line hierarchy"></span>Hierarchy (${hierarchyCount})</span>
+    </div>
     ${email}
     <p><strong>Institution:</strong> ${node.institution || "Unknown"}</p>
     <p><strong>Department:</strong> ${node.department || "Unknown"}</p>
@@ -396,6 +461,13 @@ function show(node) {
     <p><strong>Keywords:</strong> ${node.keywords.join(", ") || "None yet"}</p>
     ${node.notes ? `<p><strong>Notes:</strong> ${node.notes}</p>` : ""}
     ${profile}`;
+  const toggle = document.getElementById("relationsToggle");
+  toggle.addEventListener("change", () => {
+    relationsOnly = toggle.checked;
+    draw();
+    fitVisible();
+  });
+  draw();
 }
 function setMode(nextMode) {
   mode = nextMode;
