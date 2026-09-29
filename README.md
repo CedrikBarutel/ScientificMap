@@ -2,6 +2,13 @@
 
 Local Python pipeline for collecting public academic profiles, including location/provenance metadata, enriching them with publication metadata, creating maps, suggesting seminar groups, and exporting reviewed campaign contacts.
 
+## View the maps
+
+No local download is needed. The HTML files stay in this GitHub repository and can be opened directly in a browser through HTMLPreview:
+
+- [Institution map](https://htmlpreview.github.io/?https://github.com/CedrikBarutel/ScientificMap/blob/main/maps/institution_map.html)
+- [Research map](https://htmlpreview.github.io/?https://github.com/CedrikBarutel/ScientificMap/blob/main/maps/research_map.html)
+
 ## Quick start
 
 ```bash
