@@ -1,4 +1,5 @@
 name: Regenerate unified map
+# retrigger after template fix
 
 on:
   push:
