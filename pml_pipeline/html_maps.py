@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import json
 import math
+from collections import defaultdict
 from pathlib import Path
 
 from .models import Edge, Person
 
 
-VIEW_WIDTH = 900
-VIEW_HEIGHT = 680
+VIEW_WIDTH = 1000
+VIEW_HEIGHT = 720
 
 
 def group_value(person: Person, group_by: str) -> str:
@@ -21,61 +22,60 @@ def group_value(person: Person, group_by: str) -> str:
 
 
 def build_nodes(people: list[Person], group_by: str) -> list[dict]:
-    groups = sorted({group_value(person, group_by) for person in people})
-    group_index = {group: index for index, group in enumerate(groups)}
+    """Create a stable clustered layout for one grouping mode."""
+    by_group: dict[str, list[Person]] = defaultdict(list)
+    for person in people:
+        by_group[group_value(person, group_by)].append(person)
+
+    groups = sorted(by_group)
+    center_x = VIEW_WIDTH / 2
+    center_y = VIEW_HEIGHT / 2
+    cluster_ring = min(VIEW_WIDTH, VIEW_HEIGHT) * 0.31
     nodes: list[dict] = []
-    for index, person in enumerate(people):
-        angle = (2 * math.pi * index) / max(len(people), 1)
-        radius = 220 + 35 * group_index.get(group_value(person, group_by), 0)
-        nodes.append(
-            {
-                "id": person.person_id,
-                "name": person.name,
-                "institution": person.institution,
-                "department": person.department,
-                "location": person.location,
-                "group": group_value(person, group_by),
-                "keywords": person.research_keywords + person.publication_keywords,
-                "x": round(420 + radius * math.cos(angle), 2),
-                "y": round(320 + radius * math.sin(angle), 2),
-            }
-        )
+
+    for group_index, group in enumerate(groups):
+        members = sorted(by_group[group], key=lambda person: person.name.lower())
+        if len(groups) == 1:
+            cluster_x, cluster_y = center_x, center_y
+        else:
+            cluster_angle = (2 * math.pi * group_index) / len(groups) - math.pi / 2
+            cluster_x = center_x + cluster_ring * math.cos(cluster_angle)
+            cluster_y = center_y + cluster_ring * math.sin(cluster_angle)
+
+        local_radius = 22 + 10 * math.sqrt(max(len(members), 1))
+        for member_index, person in enumerate(members):
+            if len(members) == 1:
+                x, y = cluster_x, cluster_y
+            else:
+                angle = (2 * math.pi * member_index) / len(members)
+                ring = local_radius + 13 * (member_index // 12)
+                x = cluster_x + ring * math.cos(angle)
+                y = cluster_y + ring * math.sin(angle)
+
+            nodes.append(
+                {
+                    "id": person.person_id,
+                    "name": person.name,
+                    "email": person.email,
+                    "institution": person.institution,
+                    "department": person.department,
+                    "location": person.location,
+                    "role": person.role,
+                    "profile_url": person.profile_url,
+                    "group": group,
+                    "keywords": person.research_keywords + person.publication_keywords,
+                    "source_urls": person.source_urls,
+                    "notes": person.notes,
+                    "x": round(x, 2),
+                    "y": round(y, 2),
+                }
+            )
     return nodes
 
 
-def build_map_data(people: list[Person], edges: list[Edge]) -> dict:
-    institution_nodes = {node["id"]: node for node in build_nodes(people, "institution")}
-    topic_nodes = {node["id"]: node for node in build_nodes(people, "keyword")}
-
-    nodes: list[dict] = []
-    for person in people:
-        institution = institution_nodes[person.person_id]
-        topic = topic_nodes[person.person_id]
-        nodes.append(
-            {
-                "id": person.person_id,
-                "name": person.name,
-                "institution": person.institution,
-                "department": person.department,
-                "location": person.location,
-                "keywords": person.research_keywords + person.publication_keywords,
-                "views": {
-                    "institution": {
-                        "group": institution["group"],
-                        "x": institution["x"],
-                        "y": institution["y"],
-                    },
-                    "topic": {
-                        "group": topic["group"],
-                        "x": topic["x"],
-                        "y": topic["y"],
-                    },
-                },
-            }
-        )
-
-    visible_ids = {node["id"] for node in nodes}
-    links = [
+def build_links(people: list[Person], edges: list[Edge]) -> list[dict]:
+    visible_ids = {person.person_id for person in people}
+    return [
         {
             "source": edge.normalized().source_person_id,
             "target": edge.normalized().target_person_id,
@@ -87,388 +87,404 @@ def build_map_data(people: list[Person], edges: list[Edge]) -> dict:
         if edge.source_person_id in visible_ids and edge.target_person_id in visible_ids
     ]
 
-    return {
-        "nodes": nodes,
-        "links": links,
-        "views": {
-            "institution": {
-                "label": "Institution",
-                "groups": sorted({node["views"]["institution"]["group"] for node in nodes}),
+
+def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> None:
+    institution_nodes = build_nodes(people, "institution")
+    topic_nodes = build_nodes(people, "keyword")
+    data = json.dumps(
+        {
+            "views": {
+                "institution": {
+                    "label": "Institution",
+                    "nodes": institution_nodes,
+                    "groups": sorted({node["group"] for node in institution_nodes}),
+                },
+                "topic": {
+                    "label": "Research topic",
+                    "nodes": topic_nodes,
+                    "groups": sorted({node["group"] for node in topic_nodes}),
+                },
             },
-            "topic": {
-                "label": "Topic",
-                "groups": sorted({node["views"]["topic"]["group"] for node in nodes}),
-            },
+            "links": build_links(people, edges),
         },
-    }
+        ensure_ascii=False,
+    )
 
-
-def render_network_map(
-    people: list[Person],
-    edges: list[Edge],
-    title: str,
-    output_path: Path,
-) -> None:
-    data = json.dumps(build_map_data(people, edges), ensure_ascii=False)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        f"""<!doctype html>
+    html = r'''<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{title}</title>
+  <title>ScientificMap</title>
   <style>
-    :root {{
+    :root {
       color-scheme: light;
-      --border: #d9dde5;
+      --bg: #f5f6f8;
+      --panel: #ffffff;
+      --line: #d9dde5;
       --text: #18202b;
       --muted: #667085;
-      --panel: #ffffff;
-      --canvas: #fbfcfd;
-      --accent: #315f8c;
-    }}
-    * {{ box-sizing: border-box; }}
-    body {{
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-      color: var(--text);
-      background: #f7f8fa;
-    }}
-    header {{
-      padding: 16px 20px 12px;
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
-    }}
-    h1 {{ margin: 0 0 10px; font-size: 22px; }}
-    .controls {{
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }}
-    .mode-switch {{
-      display: inline-flex;
-      border: 1px solid #b8c0cc;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #fff;
-    }}
-    .mode-switch button {{
-      border: 0;
-      border-right: 1px solid #b8c0cc;
-      background: #fff;
-      padding: 8px 12px;
-      cursor: pointer;
-      color: #344054;
-      font-weight: 600;
-    }}
-    .mode-switch button:last-child {{ border-right: 0; }}
-    .mode-switch button.active {{
-      background: var(--accent);
-      color: #fff;
-    }}
-    select, input, .zoom-controls button {{
-      min-height: 34px;
-      border: 1px solid #b8c0cc;
-      border-radius: 6px;
-      padding: 6px 8px;
-      background: #fff;
-      color: var(--text);
-    }}
-    input {{ min-width: 220px; }}
-    .zoom-controls {{
-      display: inline-flex;
-      gap: 5px;
-      margin-left: auto;
-    }}
-    .zoom-controls button {{
-      min-width: 36px;
-      font-weight: 700;
-      cursor: pointer;
-    }}
-    #resetZoom {{ min-width: 58px; font-weight: 600; }}
-    main {{
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 300px;
-      min-height: calc(100vh - 92px);
-    }}
-    .map-wrap {{
-      position: relative;
-      overflow: hidden;
-      background: var(--canvas);
-    }}
-    svg {{
-      width: 100%;
-      height: calc(100vh - 92px);
-      background: var(--canvas);
-      cursor: grab;
-      touch-action: none;
-      user-select: none;
-    }}
-    svg.dragging {{ cursor: grabbing; }}
-    aside {{
-      border-left: 1px solid var(--border);
-      background: var(--panel);
-      padding: 16px;
-      overflow: auto;
-    }}
-    aside h2 {{ margin-top: 0; }}
-    .node {{
-      cursor: pointer;
-      stroke: #fff;
-      stroke-width: 1.5;
-    }}
-    .link {{ stroke: #9aa6b2; stroke-opacity: .48; }}
-    .label {{
-      font-size: 11px;
-      pointer-events: none;
-      fill: #253040;
-    }}
-    .muted {{ color: var(--muted); }}
-    .hint {{
-      position: absolute;
-      left: 12px;
-      bottom: 10px;
-      padding: 5px 8px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, .88);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 12px;
-      pointer-events: none;
-    }}
-    @media (max-width: 900px) {{
-      .zoom-controls {{ margin-left: 0; }}
-    }}
-    @media (max-width: 760px) {{
-      main {{ grid-template-columns: 1fr; }}
-      aside {{ border-left: 0; border-top: 1px solid var(--border); }}
-      svg {{ height: 68vh; }}
-      input {{ min-width: 160px; }}
-    }}
+      --accent: #2f6690;
+      --accent-soft: #e9f0f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, sans-serif; color: var(--text); background: var(--bg); }
+    header { background: var(--panel); border-bottom: 1px solid var(--line); }
+    .topbar { padding: 15px 22px 0; display: flex; align-items: baseline; gap: 14px; }
+    h1 { margin: 0; font-size: 22px; }
+    .subtitle { color: var(--muted); font-size: 13px; }
+    .tabs { display: flex; gap: 4px; padding: 12px 22px 0; }
+    .tab { border: 0; background: transparent; padding: 10px 14px; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 650; color: #475467; }
+    .tab.active { color: var(--accent); border-color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .controls { padding: 12px 18px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--panel); border-bottom: 1px solid var(--line); }
+    .segmented { display: inline-flex; border: 1px solid #b8c0cc; border-radius: 8px; overflow: hidden; background: #fff; }
+    .segmented button { border: 0; border-right: 1px solid #d5dae1; background: #fff; padding: 8px 12px; cursor: pointer; }
+    .segmented button:last-child { border-right: 0; }
+    .segmented button.active { background: var(--accent-soft); color: #174a70; font-weight: 700; }
+    button, select, input, textarea { font: inherit; }
+    select, input, textarea { min-height: 36px; border: 1px solid #b8c0cc; border-radius: 7px; padding: 7px 9px; background: #fff; }
+    .control-button { min-height: 36px; border: 1px solid #b8c0cc; border-radius: 7px; background: #fff; padding: 6px 10px; cursor: pointer; }
+    .control-button:hover { background: #f3f5f7; }
+    .zoom-group { display: inline-flex; gap: 4px; margin-left: auto; }
+    .zoom-group .control-button { min-width: 38px; font-weight: 700; }
+
+    .map-layout { display: grid; grid-template-columns: minmax(0, 1fr) 310px; min-height: calc(100vh - 145px); }
+    .map-wrap { position: relative; min-width: 0; overflow: hidden; background: #fbfcfd; }
+    svg { width: 100%; height: calc(100vh - 145px); display: block; cursor: grab; user-select: none; touch-action: none; }
+    svg.dragging { cursor: grabbing; }
+    aside { border-left: 1px solid var(--line); background: var(--panel); padding: 16px; overflow: auto; max-height: calc(100vh - 145px); }
+    aside h2 { margin: 0 0 12px; font-size: 19px; }
+    aside p { margin: 8px 0; line-height: 1.4; }
+    aside a { color: #245b86; overflow-wrap: anywhere; }
+    .node { cursor: pointer; stroke: #fff; stroke-width: 1.8; vector-effect: non-scaling-stroke; }
+    .node:hover { stroke: #18202b; stroke-width: 2.3; }
+    .link { stroke: #9aa6b2; stroke-opacity: .45; vector-effect: non-scaling-stroke; }
+    .label { font-size: 11px; pointer-events: none; fill: #253040; paint-order: stroke; stroke: #fbfcfd; stroke-width: 3px; stroke-linejoin: round; }
+    .muted { color: var(--muted); }
+    .status { font-size: 12px; color: var(--muted); }
+
+    .content { max-width: 1050px; margin: 0 auto; padding: 26px 22px 50px; }
+    .content h2 { margin-top: 0; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .form-grid label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 650; }
+    .form-grid .wide { grid-column: 1 / -1; }
+    textarea { min-height: 80px; resize: vertical; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .primary { border-color: var(--accent); background: var(--accent); color: white; }
+    .primary:hover { background: #245779; }
+    pre { background: #f7f8fa; border: 1px solid var(--line); border-radius: 7px; padding: 12px; overflow-x: auto; white-space: pre-wrap; }
+    .algo-row { display: grid; grid-template-columns: 190px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #eceff3; }
+    .algo-row:last-child { border-bottom: 0; }
+    .algo-row code { font-size: 12px; }
+
+    @media (max-width: 800px) {
+      .map-layout { grid-template-columns: 1fr; }
+      aside { border-left: 0; border-top: 1px solid var(--line); max-height: none; }
+      svg { height: 67vh; }
+      .zoom-group { margin-left: 0; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .wide { grid-column: auto; }
+      .algo-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>{title}</h1>
-    <div class="controls">
-      <div class="mode-switch" aria-label="Map grouping">
-        <button type="button" data-mode="institution" class="active">Institution</button>
-        <button type="button" data-mode="topic">Topic</button>
-      </div>
-      <label>Group <select id="groupFilter"><option value="">All groups</option></select></label>
-      <label>Search <input id="search" placeholder="Name, institution, keyword"></label>
-      <div class="zoom-controls" aria-label="Zoom controls">
-        <button type="button" id="zoomOut" title="Zoom out">−</button>
-        <button type="button" id="zoomIn" title="Zoom in">+</button>
-        <button type="button" id="resetZoom" title="Reset zoom and pan">Reset</button>
-      </div>
+<header>
+  <div class="topbar">
+    <h1>ScientificMap</h1>
+    <span class="subtitle">academic network explorer</span>
+  </div>
+  <nav class="tabs" aria-label="ScientificMap sections">
+    <button class="tab active" data-tab="explorer">Explorer</button>
+    <button class="tab" data-tab="add-info">Add info</button>
+    <button class="tab" data-tab="algorithms">Algorithms</button>
+  </nav>
+</header>
+
+<section id="explorer" class="tab-panel active">
+  <div class="controls">
+    <div class="segmented" aria-label="Map grouping">
+      <button id="modeInstitution" class="active" data-mode="institution">Institution</button>
+      <button id="modeTopic" data-mode="topic">Topic</button>
     </div>
-  </header>
-  <main>
+    <label>Group <select id="groupFilter"><option value="">All groups</option></select></label>
+    <label>Search <input id="search" placeholder="Name, institution, keyword"></label>
+    <label><input id="labelsToggle" type="checkbox" checked> Labels</label>
+    <span id="visibleStatus" class="status"></span>
+    <div class="zoom-group" aria-label="Map zoom controls">
+      <button class="control-button" id="zoomOut" title="Zoom out">−</button>
+      <button class="control-button" id="zoomIn" title="Zoom in">+</button>
+      <button class="control-button" id="fitVisible">Fit visible</button>
+      <button class="control-button" id="resetView">Reset</button>
+    </div>
+  </div>
+  <div class="map-layout">
     <div class="map-wrap">
-      <svg id="map" viewBox="0 0 {VIEW_WIDTH} {VIEW_HEIGHT}" role="img" aria-label="{title}">
+      <svg id="map" viewBox="0 0 1000 720" role="img" aria-label="Academic network map">
         <g id="viewport"></g>
       </svg>
-      <div class="hint">Mouse wheel or +/− to zoom · drag to pan</div>
     </div>
-    <aside id="details">
-      <strong>Academic network</strong>
-      <p class="muted">Select a node to inspect profile details.</p>
-    </aside>
-  </main>
-  <script>
-    const data = {data};
-    const palette = ["#356d9f", "#b44b62", "#4f8f55", "#8a63a8", "#b77928", "#2f7f87", "#7a6a45", "#5b6f95"];
-    const svg = document.getElementById("map");
-    const viewport = document.getElementById("viewport");
-    const groupFilter = document.getElementById("groupFilter");
-    const search = document.getElementById("search");
-    const details = document.getElementById("details");
-    const modeButtons = [...document.querySelectorAll("[data-mode]")];
-    const nodeById = new Map(data.nodes.map(node => [node.id, node]));
+    <aside id="details"><strong>Academic network</strong><p class="muted">Select a node to inspect profile details.</p></aside>
+  </div>
+</section>
 
-    let currentMode = "institution";
-    let transform = {{ x: 0, y: 0, scale: 1 }};
-    let dragState = null;
+<section id="add-info" class="tab-panel">
+  <div class="content">
+    <h2>Add researcher information</h2>
+    <p class="muted">This page is static, so it cannot write directly to GitHub. Fill the form and copy or download a CSV row ready to add to the project dataset.</p>
+    <div class="card">
+      <div class="form-grid" id="personForm">
+        <label>Name<input data-field="name" placeholder="Name"></label>
+        <label>Email<input data-field="email" placeholder="name@institution.org"></label>
+        <label>Institution<input data-field="institution" placeholder="Institution"></label>
+        <label>Department<input data-field="department" placeholder="Department / group"></label>
+        <label>Location<input data-field="location" placeholder="City or address"></label>
+        <label>Role<input data-field="role" placeholder="PI, postdoc, PhD, ..."></label>
+        <label class="wide">Profile URL<input data-field="profile_url" placeholder="https://..."></label>
+        <label class="wide">Research keywords<input data-field="research_keywords" placeholder="active matter; cytoskeleton; soft matter"></label>
+        <label class="wide">Source URLs<input data-field="source_urls" placeholder="https://...; https://..."></label>
+        <label class="wide">Notes<textarea data-field="notes" placeholder="For example: met in Leiden 2026; discussed spindle mechanics"></textarea></label>
+      </div>
+      <div class="actions">
+        <button class="control-button primary" id="copyCsv">Copy CSV row</button>
+        <button class="control-button" id="downloadCsv">Download CSV row</button>
+        <button class="control-button" id="clearForm">Clear</button>
+      </div>
+      <p id="formStatus" class="status"></p>
+      <pre id="csvPreview"></pre>
+    </div>
+  </div>
+</section>
 
-    function currentView(node) {{
-      return node.views[currentMode];
-    }}
+<section id="algorithms" class="tab-panel">
+  <div class="content">
+    <h2>Algorithms & data pipeline</h2>
+    <p class="muted">These are the project operations behind the map. Copy a command and run it from the repository on your machine.</p>
+    <div class="card">
+      <div class="algo-row"><strong>Collect profiles</strong><span>Collect public academic profiles from configured official sources.</span><button class="control-button copy-command" data-command="python3 script.py collect --config config/sources.yaml">Copy command</button></div>
+      <div class="algo-row"><strong>Enrich profiles</strong><span>Add publication metadata and publication-derived research keywords.</span><button class="control-button copy-command" data-command="python3 script.py enrich">Copy command</button></div>
+      <div class="algo-row"><strong>Build network</strong><span>Construct institution, department, keyword, linked-profile, and coauthor edges; rebuild this map.</span><button class="control-button copy-command" data-command="python3 script.py build-graph">Copy command</button></div>
+      <div class="algo-row"><strong>Suggest seminar</strong><span>Find researchers matching a topic and generate a candidate list.</span><button class="control-button copy-command" data-command="python3 script.py suggest-seminars --topic &quot;active matter&quot; --max-contacts 30">Copy example</button></div>
+      <div class="algo-row"><strong>Export campaign</strong><span>Create a manual-review CSV for an invitation campaign. It does not send email.</span><button class="control-button copy-command" data-command="python3 script.py export-campaign --campaign-name &quot;Seminar&quot; --topic &quot;active matter&quot;">Copy example</button></div>
+    </div>
+    <div class="card">
+      <strong>Current graph relations</strong>
+      <p class="muted">same institution · same department · shared keyword · linked profile · coauthor</p>
+    </div>
+  </div>
+</section>
 
-    function color(group) {{
-      const index = Math.abs([...group].reduce((total, char) => total + char.charCodeAt(0), 0)) % palette.length;
-      return palette[index];
-    }}
+<script>
+const data = __DATA__;
+const palette = ["#356d9f", "#b44b62", "#4f8f55", "#8a63a8", "#b77928", "#2f7f87", "#7a6a45", "#5b6f95", "#8a5268", "#457b6c"];
+const svg = document.getElementById("map");
+const viewport = document.getElementById("viewport");
+const groupFilter = document.getElementById("groupFilter");
+const search = document.getElementById("search");
+const details = document.getElementById("details");
+const labelsToggle = document.getElementById("labelsToggle");
+const visibleStatus = document.getElementById("visibleStatus");
+let mode = "institution";
+let transform = {x: 0, y: 0, k: 1};
+let dragging = false;
+let lastPointer = null;
 
-    function populateGroups() {{
-      const previous = groupFilter.value;
-      groupFilter.innerHTML = '<option value="">All groups</option>';
-      for (const group of data.views[currentMode].groups) {{
-        const option = document.createElement("option");
-        option.value = group;
-        option.textContent = group;
-        groupFilter.appendChild(option);
-      }}
-      groupFilter.value = data.views[currentMode].groups.includes(previous) ? previous : "";
-    }}
+function currentView() { return data.views[mode]; }
+function currentNodeMap() { return new Map(currentView().nodes.map(node => [node.id, node])); }
+function color(group) {
+  const index = Math.abs([...group].reduce((total, char) => total + char.charCodeAt(0), 0)) % palette.length;
+  return palette[index];
+}
+function matches(node) {
+  const selected = groupFilter.value;
+  const query = search.value.trim().toLowerCase();
+  const blob = [node.name, node.email, node.institution, node.department, node.location, node.role, node.group, node.keywords.join(" "), node.notes].join(" ").toLowerCase();
+  return (!selected || node.group === selected) && (!query || blob.includes(query));
+}
+function applyTransform() {
+  viewport.setAttribute("transform", `translate(${transform.x} ${transform.y}) scale(${transform.k})`);
+}
+function resetTransform() {
+  transform = {x: 0, y: 0, k: 1};
+  applyTransform();
+}
+function zoomBy(factor, centerX = 500, centerY = 360) {
+  const nextK = Math.max(0.25, Math.min(8, transform.k * factor));
+  const ratio = nextK / transform.k;
+  transform.x = centerX - (centerX - transform.x) * ratio;
+  transform.y = centerY - (centerY - transform.y) * ratio;
+  transform.k = nextK;
+  applyTransform();
+}
+function fitVisible() {
+  const visibleNodes = currentView().nodes.filter(matches);
+  if (!visibleNodes.length) return;
+  const xs = visibleNodes.map(node => node.x);
+  const ys = visibleNodes.map(node => node.y);
+  const minX = Math.min(...xs) - 45, maxX = Math.max(...xs) + 45;
+  const minY = Math.min(...ys) - 45, maxY = Math.max(...ys) + 45;
+  const width = Math.max(80, maxX - minX), height = Math.max(80, maxY - minY);
+  const k = Math.max(0.25, Math.min(5, Math.min(920 / width, 640 / height)));
+  transform.k = k;
+  transform.x = 500 - ((minX + maxX) / 2) * k;
+  transform.y = 360 - ((minY + maxY) / 2) * k;
+  applyTransform();
+}
+function populateGroups() {
+  groupFilter.innerHTML = '<option value="">All groups</option>';
+  currentView().groups.forEach(group => {
+    const option = document.createElement("option");
+    option.value = group;
+    option.textContent = group;
+    groupFilter.appendChild(option);
+  });
+}
+function draw() {
+  viewport.innerHTML = "";
+  const view = currentView();
+  const nodeById = currentNodeMap();
+  const visibleNodes = view.nodes.filter(matches);
+  const visible = new Set(visibleNodes.map(node => node.id));
+  visibleStatus.textContent = `${visibleNodes.length} / ${view.nodes.length} people`;
 
-    function matches(node) {{
-      const view = currentView(node);
-      const selected = groupFilter.value;
-      const query = search.value.trim().toLowerCase();
-      const blob = [
-        node.name,
-        node.institution,
-        node.department,
-        node.location,
-        view.group,
-        node.keywords.join(" ")
-      ].join(" ").toLowerCase();
-      return (!selected || view.group === selected) && (!query || blob.includes(query));
-    }}
+  for (const link of data.links) {
+    if (!visible.has(link.source) || !visible.has(link.target)) continue;
+    const source = nodeById.get(link.source);
+    const target = nodeById.get(link.target);
+    if (!source || !target) continue;
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", source.x); line.setAttribute("y1", source.y);
+    line.setAttribute("x2", target.x); line.setAttribute("y2", target.y);
+    line.setAttribute("class", "link");
+    line.setAttribute("stroke-width", Math.max(0.8, Math.min(4, link.weight)));
+    viewport.appendChild(line);
+  }
 
-    function draw() {{
-      viewport.innerHTML = "";
-      const visible = new Set(data.nodes.filter(matches).map(node => node.id));
+  for (const node of visibleNodes) {
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", node.x); circle.setAttribute("cy", node.y);
+    circle.setAttribute("r", 8); circle.setAttribute("fill", color(node.group));
+    circle.setAttribute("class", "node");
+    circle.addEventListener("click", event => { event.stopPropagation(); show(node); });
+    viewport.appendChild(circle);
+    if (labelsToggle.checked) {
+      const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      label.setAttribute("x", node.x + 11); label.setAttribute("y", node.y + 4);
+      label.setAttribute("class", "label"); label.textContent = node.name;
+      viewport.appendChild(label);
+    }
+  }
+  applyTransform();
+}
+function show(node) {
+  const profile = node.profile_url ? `<p><a href="${node.profile_url}" target="_blank" rel="noopener">Open profile</a></p>` : "";
+  const email = node.email ? `<p><strong>Email:</strong> ${node.email}</p>` : "";
+  details.innerHTML = `<h2>${node.name}</h2>
+    ${email}
+    <p><strong>Institution:</strong> ${node.institution || "Unknown"}</p>
+    <p><strong>Department:</strong> ${node.department || "Unknown"}</p>
+    <p><strong>Location:</strong> ${node.location || "Unknown"}</p>
+    <p><strong>Role:</strong> ${node.role || "Unknown"}</p>
+    <p><strong>${currentView().label}:</strong> ${node.group}</p>
+    <p><strong>Keywords:</strong> ${node.keywords.join(", ") || "None yet"}</p>
+    ${node.notes ? `<p><strong>Notes:</strong> ${node.notes}</p>` : ""}
+    ${profile}`;
+}
+function setMode(nextMode) {
+  mode = nextMode;
+  document.querySelectorAll("[data-mode]").forEach(button => button.classList.toggle("active", button.dataset.mode === mode));
+  populateGroups();
+  draw();
+  fitVisible();
+}
 
-      for (const link of data.links) {{
-        if (!visible.has(link.source) || !visible.has(link.target)) continue;
-        const source = nodeById.get(link.source);
-        const target = nodeById.get(link.target);
-        const sourceView = currentView(source);
-        const targetView = currentView(target);
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", sourceView.x);
-        line.setAttribute("y1", sourceView.y);
-        line.setAttribute("x2", targetView.x);
-        line.setAttribute("y2", targetView.y);
-        line.setAttribute("class", "link");
-        line.setAttribute("stroke-width", Math.max(1, Math.min(5, link.weight)));
-        viewport.appendChild(line);
-      }}
+document.querySelectorAll(".tab").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item === button));
+    document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === button.dataset.tab));
+  });
+});
+document.querySelectorAll("[data-mode]").forEach(button => button.addEventListener("click", () => setMode(button.dataset.mode)));
+groupFilter.addEventListener("change", () => { draw(); fitVisible(); });
+search.addEventListener("input", () => { draw(); fitVisible(); });
+labelsToggle.addEventListener("change", draw);
+document.getElementById("zoomIn").addEventListener("click", () => zoomBy(1.25));
+document.getElementById("zoomOut").addEventListener("click", () => zoomBy(0.8));
+document.getElementById("fitVisible").addEventListener("click", fitVisible);
+document.getElementById("resetView").addEventListener("click", resetTransform);
+svg.addEventListener("wheel", event => {
+  event.preventDefault();
+  const rect = svg.getBoundingClientRect();
+  const x = (event.clientX - rect.left) * (1000 / rect.width);
+  const y = (event.clientY - rect.top) * (720 / rect.height);
+  zoomBy(event.deltaY < 0 ? 1.12 : 0.89, x, y);
+}, {passive: false});
+svg.addEventListener("pointerdown", event => { dragging = true; lastPointer = {x: event.clientX, y: event.clientY}; svg.classList.add("dragging"); svg.setPointerCapture(event.pointerId); });
+svg.addEventListener("pointermove", event => {
+  if (!dragging || !lastPointer) return;
+  const rect = svg.getBoundingClientRect();
+  transform.x += (event.clientX - lastPointer.x) * (1000 / rect.width);
+  transform.y += (event.clientY - lastPointer.y) * (720 / rect.height);
+  lastPointer = {x: event.clientX, y: event.clientY};
+  applyTransform();
+});
+function stopDrag() { dragging = false; lastPointer = null; svg.classList.remove("dragging"); }
+svg.addEventListener("pointerup", stopDrag);
+svg.addEventListener("pointercancel", stopDrag);
 
-      for (const node of data.nodes) {{
-        if (!visible.has(node.id)) continue;
-        const view = currentView(node);
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", view.x);
-        circle.setAttribute("cy", view.y);
-        circle.setAttribute("r", 8);
-        circle.setAttribute("fill", color(view.group));
-        circle.setAttribute("class", "node");
-        circle.addEventListener("click", event => {{
-          event.stopPropagation();
-          show(node);
-        }});
-        viewport.appendChild(circle);
+const personFields = ["person_id","name","email","institution","department","location","role","profile_url","research_keywords","publication_keywords","source_urls","confidence_score","last_seen_at","notes"];
+function csvEscape(value) {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+function formValues() {
+  const values = Object.fromEntries(personFields.map(field => [field, ""]));
+  document.querySelectorAll("#personForm [data-field]").forEach(input => values[input.dataset.field] = input.value.trim());
+  return values;
+}
+function csvText() {
+  const values = formValues();
+  return personFields.map(csvEscape).join(",") + "\n" + personFields.map(field => csvEscape(values[field])).join(",") + "\n";
+}
+function updateCsvPreview() { document.getElementById("csvPreview").textContent = csvText(); }
+document.querySelectorAll("#personForm [data-field]").forEach(input => input.addEventListener("input", updateCsvPreview));
+document.getElementById("copyCsv").addEventListener("click", async () => {
+  await navigator.clipboard.writeText(csvText());
+  document.getElementById("formStatus").textContent = "CSV row copied.";
+});
+document.getElementById("downloadCsv").addEventListener("click", () => {
+  const blob = new Blob([csvText()], {type: "text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = "scientificmap_person.csv"; a.click();
+  URL.revokeObjectURL(url);
+  document.getElementById("formStatus").textContent = "CSV row downloaded.";
+});
+document.getElementById("clearForm").addEventListener("click", () => {
+  document.querySelectorAll("#personForm [data-field]").forEach(input => input.value = "");
+  document.getElementById("formStatus").textContent = "";
+  updateCsvPreview();
+});
+document.querySelectorAll(".copy-command").forEach(button => button.addEventListener("click", async () => {
+  await navigator.clipboard.writeText(button.dataset.command);
+  const old = button.textContent; button.textContent = "Copied"; setTimeout(() => button.textContent = old, 900);
+}));
 
-        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        label.setAttribute("x", view.x + 11);
-        label.setAttribute("y", view.y + 4);
-        label.setAttribute("class", "label");
-        label.textContent = node.name;
-        viewport.appendChild(label);
-      }}
-
-      applyTransform();
-    }}
-
-    function show(node) {{
-      const view = currentView(node);
-      details.innerHTML = `<h2>${{node.name}}</h2>
-        <p><strong>Institution:</strong> ${{node.institution || "Unknown"}}</p>
-        <p><strong>Department:</strong> ${{node.department || "Unknown"}}</p>
-        <p><strong>Location:</strong> ${{node.location || "Unknown"}}</p>
-        <p><strong>${{data.views[currentMode].label}}:</strong> ${{view.group}}</p>
-        <p><strong>Keywords:</strong> ${{node.keywords.join(", ") || "None yet"}}</p>`;
-    }}
-
-    function applyTransform() {{
-      viewport.setAttribute(
-        "transform",
-        `translate(${{transform.x}} ${{transform.y}}) scale(${{transform.scale}})`
-      );
-    }}
-
-    function zoomAt(factor, cx = {VIEW_WIDTH / 2}, cy = {VIEW_HEIGHT / 2}) {{
-      const oldScale = transform.scale;
-      const newScale = Math.max(0.35, Math.min(5, oldScale * factor));
-      if (newScale === oldScale) return;
-      const ratio = newScale / oldScale;
-      transform.x = cx - (cx - transform.x) * ratio;
-      transform.y = cy - (cy - transform.y) * ratio;
-      transform.scale = newScale;
-      applyTransform();
-    }}
-
-    function resetZoom() {{
-      transform = {{ x: 0, y: 0, scale: 1 }};
-      applyTransform();
-    }}
-
-    function eventPoint(event) {{
-      const point = svg.createSVGPoint();
-      point.x = event.clientX;
-      point.y = event.clientY;
-      return point.matrixTransform(svg.getScreenCTM().inverse());
-    }}
-
-    document.getElementById("zoomIn").addEventListener("click", () => zoomAt(1.25));
-    document.getElementById("zoomOut").addEventListener("click", () => zoomAt(0.8));
-    document.getElementById("resetZoom").addEventListener("click", resetZoom);
-
-    svg.addEventListener("wheel", event => {{
-      event.preventDefault();
-      const point = eventPoint(event);
-      zoomAt(event.deltaY < 0 ? 1.12 : 0.89, point.x, point.y);
-    }}, {{ passive: false }});
-
-    svg.addEventListener("pointerdown", event => {{
-      if (event.button !== 0) return;
-      const point = eventPoint(event);
-      dragState = {{ x: point.x, y: point.y, tx: transform.x, ty: transform.y }};
-      svg.classList.add("dragging");
-      svg.setPointerCapture(event.pointerId);
-    }});
-
-    svg.addEventListener("pointermove", event => {{
-      if (!dragState) return;
-      const point = eventPoint(event);
-      transform.x = dragState.tx + (point.x - dragState.x);
-      transform.y = dragState.ty + (point.y - dragState.y);
-      applyTransform();
-    }});
-
-    function endDrag(event) {{
-      if (!dragState) return;
-      dragState = null;
-      svg.classList.remove("dragging");
-      if (svg.hasPointerCapture(event.pointerId)) svg.releasePointerCapture(event.pointerId);
-    }}
-
-    svg.addEventListener("pointerup", endDrag);
-    svg.addEventListener("pointercancel", endDrag);
-
-    modeButtons.forEach(button => {{
-      button.addEventListener("click", () => {{
-        currentMode = button.dataset.mode;
-        modeButtons.forEach(item => item.classList.toggle("active", item === button));
-        populateGroups();
-        resetZoom();
-        draw();
-      }});
-    }});
-
-    groupFilter.addEventListener("change", draw);
-    search.addEventListener("input", draw);
-
-    populateGroups();
-    draw();
-  </script>
+populateGroups();
+draw();
+fitVisible();
+updateCsvPreview();
+</script>
 </body>
 </html>
-""",
-        encoding="utf-8",
-    )
+'''
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html.replace("__DATA__", data), encoding="utf-8")
+
+
+# Backward-compatible helper kept for older callers.
+def render_map(people: list[Person], edges: list[Edge], group_by: str, title: str, output_path: Path) -> None:
+    render_tool(people, edges, output_path)
