@@ -12,13 +12,34 @@ VIEW_WIDTH = 1000
 VIEW_HEIGHT = 720
 
 
+def institution_hierarchy(person: Person) -> dict[str, str]:
+    parts = [part.strip() for part in person.department.split("/") if part.strip()]
+    university = person.institution or "Unknown university"
+    institute = parts[0] if parts else university
+    department = parts[-2] if len(parts) >= 2 else (parts[0] if parts else university)
+    group = parts[-1] if parts else institute
+    return {
+        "university": university,
+        "institute": institute,
+        "department_level": department,
+        "group_level": group,
+    }
+
+
 def group_value(person: Person, group_by: str) -> str:
     if group_by == "keyword":
         keywords = person.research_keywords or person.publication_keywords
         return keywords[0] if keywords else "Unknown topic"
+    hierarchy = institution_hierarchy(person)
+    if group_by == "university":
+        return hierarchy["university"]
+    if group_by == "institute":
+        return hierarchy["institute"]
     if group_by == "department":
-        return person.department or "Unknown department"
-    return person.institution or "Unknown institution"
+        return hierarchy["department_level"]
+    if group_by == "group":
+        return hierarchy["group_level"]
+    return hierarchy["university"]
 
 
 def build_nodes(people: list[Person], group_by: str) -> list[dict]:
@@ -44,6 +65,7 @@ def build_nodes(people: list[Person], group_by: str) -> list[dict]:
 
         local_radius = 22 + 10 * math.sqrt(max(len(members), 1))
         for member_index, person in enumerate(members):
+            hierarchy = institution_hierarchy(person)
             if len(members) == 1:
                 x, y = cluster_x, cluster_y
             else:
@@ -59,6 +81,10 @@ def build_nodes(people: list[Person], group_by: str) -> list[dict]:
                     "email": person.email,
                     "institution": person.institution,
                     "department": person.department,
+                    "university": hierarchy["university"],
+                    "institute": hierarchy["institute"],
+                    "department_level": hierarchy["department_level"],
+                    "group_level": hierarchy["group_level"],
                     "location": person.location,
                     "role": person.role,
                     "profile_url": person.profile_url,
@@ -115,22 +141,25 @@ def build_links(people: list[Person], edges: list[Edge]) -> list[dict]:
 
 
 def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> None:
-    institution_nodes = build_nodes(people, "institution")
-    topic_nodes = build_nodes(people, "keyword")
+    view_specs = [
+        ("university", "University"),
+        ("institute", "Institute / Faculty"),
+        ("department", "Department / Unit"),
+        ("group", "Research group"),
+        ("topic", "Research topic"),
+    ]
+    built_views = {}
+    for key, label in view_specs:
+        group_by = "keyword" if key == "topic" else key
+        nodes = build_nodes(people, group_by)
+        built_views[key] = {
+            "label": label,
+            "nodes": nodes,
+            "groups": sorted({node["group"] for node in nodes}),
+        }
     data = json.dumps(
         {
-            "views": {
-                "institution": {
-                    "label": "Institution",
-                    "nodes": institution_nodes,
-                    "groups": sorted({node["group"] for node in institution_nodes}),
-                },
-                "topic": {
-                    "label": "Research topic",
-                    "nodes": topic_nodes,
-                    "groups": sorted({node["group"] for node in topic_nodes}),
-                },
-            },
+            "views": built_views,
             "links": build_links(people, edges),
         },
         ensure_ascii=False,
@@ -253,6 +282,14 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
       <button id="modeInstitution" class="active" data-mode="institution">Institution</button>
       <button id="modeTopic" data-mode="topic">Topic</button>
     </div>
+    <label id="institutionLevelControl">Level
+      <select id="institutionLevel">
+        <option value="university">University</option>
+        <option value="institute">Institute / Faculty</option>
+        <option value="department">Department / Unit</option>
+        <option value="group">Research group</option>
+      </select>
+    </label>
     <label>Group <select id="groupFilter"><option value="">All groups</option></select></label>
     <label>Search <input id="search" placeholder="Name, institution, keyword"></label>
     <label><input id="labelsToggle" type="checkbox" checked> Labels</label>
@@ -330,14 +367,17 @@ const search = document.getElementById("search");
 const details = document.getElementById("details");
 const labelsToggle = document.getElementById("labelsToggle");
 const visibleStatus = document.getElementById("visibleStatus");
+const institutionLevel = document.getElementById("institutionLevel");
+const institutionLevelControl = document.getElementById("institutionLevelControl");
 let mode = "institution";
+let institutionView = "university";
 let transform = {x: 0, y: 0, k: 1};
 let dragging = false;
 let lastPointer = null;
 let selectedNodeId = null;
 let relationsOnly = false;
 
-function currentView() { return data.views[mode]; }
+function currentView() { return data.views[mode === "topic" ? "topic" : institutionView]; }
 function currentNodeMap() { return new Map(currentView().nodes.map(node => [node.id, node])); }
 function color(group) {
   const index = Math.abs([...group].reduce((total, char) => total + char.charCodeAt(0), 0)) % palette.length;
@@ -362,7 +402,11 @@ function visibleNodesForState() {
 function matches(node) {
   const selected = groupFilter.value;
   const query = search.value.trim().toLowerCase();
-  const blob = [node.name, node.email, node.institution, node.department, node.location, node.role, node.group, node.keywords.join(" "), node.notes].join(" ").toLowerCase();
+  const blob = [
+    node.name, node.email, node.university, node.institute, node.department_level,
+    node.group_level, node.department, node.location, node.role, node.group,
+    node.keywords.join(" "), node.notes
+  ].join(" ").toLowerCase();
   return (!selected || node.group === selected) && (!query || blob.includes(query));
 }
 function applyTransform() {
@@ -473,8 +517,10 @@ function show(node) {
       ${counts.context ? `<span><span class="legend-line context"></span>Other (${counts.context})</span>` : ""}
     </div>
     ${email}
-    <p><strong>Institution:</strong> ${node.institution || "Unknown"}</p>
-    <p><strong>Department:</strong> ${node.department || "Unknown"}</p>
+    <p><strong>University:</strong> ${node.university || "Unknown"}</p>
+    <p><strong>Institute / Faculty:</strong> ${node.institute || "Unknown"}</p>
+    <p><strong>Department / Unit:</strong> ${node.department_level || "Unknown"}</p>
+    <p><strong>Group:</strong> ${node.group_level || "Unknown"}</p>
     <p><strong>Location:</strong> ${node.location || "Unknown"}</p>
     <p><strong>Role:</strong> ${node.role || "Unknown"}</p>
     <p><strong>${currentView().label}:</strong> ${node.group}</p>
@@ -492,6 +538,7 @@ function show(node) {
 function setMode(nextMode) {
   mode = nextMode;
   document.querySelectorAll("[data-mode]").forEach(button => button.classList.toggle("active", button.dataset.mode === mode));
+  institutionLevelControl.style.display = mode === "institution" ? "" : "none";
   populateGroups();
   draw();
   fitVisible();
@@ -504,6 +551,12 @@ document.querySelectorAll(".tab").forEach(button => {
   });
 });
 document.querySelectorAll("[data-mode]").forEach(button => button.addEventListener("click", () => setMode(button.dataset.mode)));
+institutionLevel.addEventListener("change", () => {
+  institutionView = institutionLevel.value;
+  populateGroups();
+  draw();
+  fitVisible();
+});
 groupFilter.addEventListener("change", () => { draw(); fitVisible(); });
 search.addEventListener("input", () => { draw(); fitVisible(); });
 labelsToggle.addEventListener("change", draw);
