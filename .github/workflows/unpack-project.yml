@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '.github/workflows/unpack-project.yml'
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
