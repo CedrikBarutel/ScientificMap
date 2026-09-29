@@ -21,7 +21,7 @@ AC_SCIENTIFIC = _names({
     "Thomas Depian",
     "Sara Di Bartolomeo",
     "Alexander Firbas",
-    "Marlene GrüNdel",
+    "Marlene Gründel",
     "Christian Hatschka",
     "Phuc Hung Hoang",
     "Enrico Iurlano",
