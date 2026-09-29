@@ -26,5 +26,4 @@ jobs:
             exit 0
           fi
           git commit -m "Regenerate map with institutional hierarchy"
-          git pull --rebase origin main
           git push origin HEAD:main
