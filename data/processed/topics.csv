@@ -1,8 +1,9 @@
 topic,person_count,people,institutions,example_keywords
 atomic force microscopy,3,Gerhard Schütz; Orestis G. Andriotis; Philipp J. Thurner,TU Wien,atomic force microscopy
-biophysics,2,Roberto Cerbino; Thomas Juffmann,Max Perutz Labs / University of Vienna; University of Vienna,biophysics
+biophysics,3,Cédrik Marius André Barutel; Roberto Cerbino; Thomas Juffmann,Max Perutz Labs / University of Vienna; TU Wien; University of Vienna,biophysics
 super-resolution microscopy,2,Gerhard Schütz; Jonas Ries,Max Perutz Labs / University of Vienna; TU Wien,super-resolution microscopy
 t-cell signaling,2,Eva Sevcsik; Mario Brameshuber,TU Wien,t-cell signaling
+active materials,1,Cédrik Marius André Barutel,TU Wien,active materials
 active matter,1,Sebastian Fürthauer,TU Wien,active matter
 adaptive optics,1,Thomas Juffmann,Max Perutz Labs / University of Vienna,adaptive optics
 advanced microscopy,1,Jonas Ries,Max Perutz Labs / University of Vienna,advanced microscopy
@@ -31,6 +32,7 @@ cell motility,1,Sebastian Fürthauer,TU Wien,cell motility
 cell studies,1,Eva Sevcsik,TU Wien,cell studies
 cellular dynamics,1,Jonas Ries,Max Perutz Labs / University of Vienna,cellular dynamics
 chess,1,Tomáš Peitl,TU Wien,chess
+cilia,1,Arun Ravi,TU Wien,cilia
 clathrin-mediated endocytosis,1,Jonas Ries,Max Perutz Labs / University of Vienna,clathrin-mediated endocytosis
 coarse-grained simulation,1,Sofia Kantorovich,University of Vienna,coarse-grained simulation
 collagen,1,Philipp J. Thurner,TU Wien,collagen
@@ -47,6 +49,7 @@ constraint programming as well as heuristics and metaheuristics machine learning
 current and previous positions,1,Tomáš Peitl,TU Wien,current and previous positions
 cutting and packing,1,Günther Raidl,TU Wien,cutting and packing
 cytoskeletal networks,1,Sebastian Fürthauer,TU Wien,cytoskeletal networks
+cytoskeleton,1,Cédrik Marius André Barutel,TU Wien,cytoskeleton
 dna origami,1,Eva Sevcsik,TU Wien,dna origami
 dqbf,1,Tomáš Peitl,TU Wien,dqbf
 dynamic programming,1,Günther Raidl,TU Wien,dynamic programming
@@ -64,6 +67,7 @@ generation algorithms,1,Phuc Hung Hoang,TU Wien,generation algorithms
 germany,1,Tomáš Peitl,TU Wien,germany
 graph algorithms,1,Martin Nöllenburg,TU Wien,graph algorithms
 graph theory theory,1,Tomáš Peitl,TU Wien,graph theory theory
+highly crosslinked cytoskeletal networks,1,Jakob Roland Schindelwig,TU Wien,highly crosslinked cytoskeletal networks
 hydrodynamics of colloids and swimmers,1,Christos N. Likos,University of Vienna,hydrodynamics of colloids and swimmers
 immunology,1,Gerhard Schütz,TU Wien,immunology
 in particular for graph drawing and network visualization computational geometry,1,Martin Nöllenburg,TU Wien,in particular for graph drawing and network visualization computational geometry
@@ -72,6 +76,7 @@ knowledge compilation boolean functions analysis proof systems,1,Alexis de Colne
 knstliche intelligenz,1,Stefan Szeider,TU Wien,knstliche intelligenz
 light microscopy,1,Thomas Juffmann,Max Perutz Labs / University of Vienna,light microscopy
 live-cell plasma membrane,1,Mario Brameshuber,TU Wien,live-cell plasma membrane
+living smart materials,1,Jakob Roland Schindelwig,TU Wien,living smart materials
 low-damage microscopy,1,Thomas Juffmann,Max Perutz Labs / University of Vienna,low-damage microscopy
 machine learning,1,Stefan Szeider,TU Wien,machine learning
 machine learning approaches,1,Christoph Dellago,University of Vienna,machine learning approaches
@@ -81,6 +86,7 @@ medicine,1,Jörg Menche,Max Perutz Labs / University of Vienna,medicine
 membrane biophysics,1,Gerhard Schütz,TU Wien,membrane biophysics
 micro- and nanomechanics,1,Philipp J. Thurner,TU Wien,micro- and nanomechanics
 micro- and nanostructured biointerfaces,1,Eva Sevcsik,TU Wien,micro- and nanostructured biointerfaces
+microswimmers,1,Arun Ravi,TU Wien,microswimmers
 minflux,1,Jonas Ries,Max Perutz Labs / University of Vienna,minflux
 molecular biophysics,1,Mario Brameshuber,TU Wien,molecular biophysics
 molecular networks,1,Jörg Menche,Max Perutz Labs / University of Vienna,molecular networks
@@ -123,6 +129,7 @@ structural cell biology,1,Jonas Ries,Max Perutz Labs / University of Vienna,stru
 structure-function relationships,1,Philipp J. Thurner,TU Wien,structure-function relationships
 super-resolution fluorescence,1,Orestis G. Andriotis,TU Wien,super-resolution fluorescence
 super-resolution fluorescence microscopy,1,Eva Sevcsik,TU Wien,super-resolution fluorescence microscopy
+synchronization,1,Arun Ravi,TU Wien,synchronization
 systems biology,1,Jörg Menche,Max Perutz Labs / University of Vienna,systems biology
 theoretical biophysics,1,Sebastian Fürthauer,TU Wien,theoretical biophysics
 transportation optimization,1,Günther Raidl,TU Wien,transportation optimization

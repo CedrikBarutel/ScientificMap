@@ -1,19 +1,19 @@
 # Academic Network Report
 
-People: 75
-Edges: 4187
+People: 78
+Edges: 4405
 
 ## Institutions
 
-- TU Wien: 68
+- TU Wien: 71
 - University of Vienna: 4
 - Max Perutz Labs / University of Vienna: 3
 
 ## Main Topics
 
+- biophysics: 3 people
 - atomic force microscopy: 3 people
 - super-resolution microscopy: 2 people
-- biophysics: 2 people
 - t-cell signaling: 2 people
 - structural cell biology: 1 people
 - advanced microscopy: 1 people
@@ -34,7 +34,7 @@ Edges: 4187
 
 ## Missing Data
 
-- Profiles without email: 9
+- Profiles without email: 12
 - Jörg Menche (Max Perutz Labs / University of Vienna)
 - Thomas Juffmann (Max Perutz Labs / University of Vienna)
 - Christopher Bacher (TU Wien)
@@ -44,12 +44,15 @@ Edges: 4187
 - Christoph Dellago (University of Vienna)
 - Christos N. Likos (University of Vienna)
 - Roberto Cerbino (University of Vienna)
+- Cédrik Marius André Barutel (TU Wien)
+- Jakob Roland Schindelwig (TU Wien)
+- Arun Ravi (TU Wien)
 
 ## Seminar Seeds
 
+- Biophysics: invite researchers connected by this topic (3 matching profiles).
 - Atomic Force Microscopy: invite researchers connected by this topic (3 matching profiles).
 - Super-Resolution Microscopy: invite researchers connected by this topic (2 matching profiles).
-- Biophysics: invite researchers connected by this topic (2 matching profiles).
 - T-Cell Signaling: invite researchers connected by this topic (2 matching profiles).
 - Structural Cell Biology: invite researchers connected by this topic (1 matching profiles).
 - Advanced Microscopy: invite researchers connected by this topic (1 matching profiles).

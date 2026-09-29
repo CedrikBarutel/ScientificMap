@@ -144,6 +144,22 @@
     "notes": ""
   },
   {
+    "person_id": "p_0f1c5362be36",
+    "name": "Arun Ravi",
+    "email": "",
+    "institution": "TU Wien",
+    "department": "Institute of Applied Physics / Biophysics Research Unit / Theory of Living Matter Group",
+    "location": "Lehargasse 6, 1060 Wien",
+    "role": "PhD Student",
+    "profile_url": "",
+    "research_keywords": "synchronization; cilia; microswimmers",
+    "publication_keywords": "",
+    "source_urls": "https://www.tuwien.at/en/phy/iap/biophysics/theory-of-living-matter-group/team",
+    "confidence_score": "0.80",
+    "last_seen_at": "2026-09-29T00:00:00+00:00",
+    "notes": "Curated from the official Theory of Living Matter team page."
+  },
+  {
     "person_id": "p_474b99321c8e",
     "name": "Benedikt Klocker",
     "email": "klocker@ac.tuwien.ac.at",
@@ -206,6 +222,22 @@
     "confidence_score": "0.60",
     "last_seen_at": "2026-06-29T08:20:47+00:00",
     "notes": ""
+  },
+  {
+    "person_id": "p_08428cfb4434",
+    "name": "Cédrik Marius André Barutel",
+    "email": "",
+    "institution": "TU Wien",
+    "department": "Institute of Applied Physics / Biophysics Research Unit / Theory of Living Matter Group",
+    "location": "Lehargasse 6, 1060 Wien",
+    "role": "PhD Student",
+    "profile_url": "",
+    "research_keywords": "active materials; biophysics; cytoskeleton",
+    "publication_keywords": "",
+    "source_urls": "https://www.tuwien.at/en/phy/iap/biophysics/theory-of-living-matter-group/team",
+    "confidence_score": "0.80",
+    "last_seen_at": "2026-09-29T00:00:00+00:00",
+    "notes": "Curated from the official Theory of Living Matter team page."
   },
   {
     "person_id": "p_6b040c1875f9",
@@ -430,6 +462,22 @@
     "confidence_score": "0.60",
     "last_seen_at": "2026-06-29T08:20:53+00:00",
     "notes": ""
+  },
+  {
+    "person_id": "p_83b541e9bcf1",
+    "name": "Jakob Roland Schindelwig",
+    "email": "",
+    "institution": "TU Wien",
+    "department": "Institute of Applied Physics / Biophysics Research Unit / Theory of Living Matter Group",
+    "location": "Lehargasse 6, 1060 Wien",
+    "role": "PhD Student",
+    "profile_url": "",
+    "research_keywords": "highly crosslinked cytoskeletal networks; living smart materials",
+    "publication_keywords": "",
+    "source_urls": "https://www.tuwien.at/en/phy/iap/biophysics/theory-of-living-matter-group/team",
+    "confidence_score": "0.80",
+    "last_seen_at": "2026-09-29T00:00:00+00:00",
+    "notes": "Curated from the official Theory of Living Matter team page."
   },
   {
     "person_id": "p_98110fe30104",
