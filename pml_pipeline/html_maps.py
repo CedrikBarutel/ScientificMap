@@ -89,6 +89,12 @@ def relation_category(edge_type: str) -> str:
         "mentee",
     }:
         return "hierarchy"
+    if normalized in {"same_department", "same_institution"}:
+        return "affiliation"
+    if normalized == "shared_keyword":
+        return "topic"
+    if normalized == "linked_profile":
+        return "linked"
     return "context"
 
 
@@ -184,12 +190,20 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
     .link { stroke: #9aa6b2; stroke-opacity: .45; vector-effect: non-scaling-stroke; }
     .link.relation-collaboration { stroke: #356d9f; stroke-opacity: .95; }
     .link.relation-hierarchy { stroke: #b77928; stroke-opacity: .95; stroke-dasharray: 7 4; }
+    .link.relation-affiliation { stroke: #4f8f55; stroke-opacity: .9; }
+    .link.relation-topic { stroke: #8a63a8; stroke-opacity: .9; }
+    .link.relation-linked { stroke: #2f7f87; stroke-opacity: .9; stroke-dasharray: 3 3; }
+    .link.relation-context { stroke: #7a6a45; stroke-opacity: .8; }
     .node.selected { stroke: #111827; stroke-width: 3; }
     .relation-toggle { display: flex; align-items: center; gap: 8px; padding: 10px 0; margin: 10px 0; border-top: 1px solid #eceff3; border-bottom: 1px solid #eceff3; }
     .relation-toggle input { min-height: 0; }
     .relation-legend { display: grid; gap: 6px; margin: 8px 0 12px; font-size: 12px; color: var(--muted); }
     .legend-line { display: inline-block; width: 28px; height: 0; margin-right: 7px; vertical-align: middle; border-top: 3px solid #356d9f; }
     .legend-line.hierarchy { border-top-color: #b77928; border-top-style: dashed; }
+    .legend-line.affiliation { border-top-color: #4f8f55; }
+    .legend-line.topic { border-top-color: #8a63a8; }
+    .legend-line.linked { border-top-color: #2f7f87; border-top-style: dashed; }
+    .legend-line.context { border-top-color: #7a6a45; }
     .label { font-size: 11px; pointer-events: auto; cursor: pointer; fill: #253040; paint-order: stroke; stroke: #fbfcfd; stroke-width: 3px; stroke-linejoin: round; }
     .muted { color: var(--muted); }
     .status { font-size: 12px; color: var(--muted); }
@@ -331,8 +345,7 @@ function color(group) {
 }
 function relationLinksFor(personId) {
   return data.links.filter(link =>
-    link.category !== "context" &&
-    (link.source === personId || link.target === personId)
+    link.source === personId || link.target === personId
   );
 }
 function visibleNodesForState() {
@@ -410,8 +423,7 @@ function draw() {
     line.setAttribute("x1", source.x); line.setAttribute("y1", source.y);
     line.setAttribute("x2", target.x); line.setAttribute("y2", target.y);
     line.setAttribute("class", "link");
-    if (relationsOnly && link.category === "collaboration") line.classList.add("relation-collaboration");
-    if (relationsOnly && link.category === "hierarchy") line.classList.add("relation-hierarchy");
+    if (relationsOnly) line.classList.add(`relation-${link.category || "context"}`);
     line.setAttribute("stroke-width", Math.max(0.8, Math.min(4, link.weight)));
     viewport.appendChild(line);
   }
@@ -441,16 +453,24 @@ function show(node) {
   const profile = node.profile_url ? `<p><a href="${node.profile_url}" target="_blank" rel="noopener">Open profile</a></p>` : "";
   const email = node.email ? `<p><strong>Email:</strong> ${node.email}</p>` : "";
   const relations = relationLinksFor(node.id);
-  const collaborationCount = relations.filter(link => link.category === "collaboration").length;
-  const hierarchyCount = relations.filter(link => link.category === "hierarchy").length;
+  const counts = Object.fromEntries(
+    ["collaboration", "hierarchy", "affiliation", "topic", "linked", "context"].map(category => [
+      category,
+      relations.filter(link => link.category === category).length
+    ])
+  );
   details.innerHTML = `<h2>${node.name}</h2>
     <label class="relation-toggle">
       <input id="relationsToggle" type="checkbox" ${relationsOnly ? "checked" : ""}>
       <strong>Relations only</strong>
     </label>
     <div class="relation-legend">
-      <span><span class="legend-line"></span>Collaboration (${collaborationCount})</span>
-      <span><span class="legend-line hierarchy"></span>Hierarchy (${hierarchyCount})</span>
+      <span><span class="legend-line"></span>Collaboration (${counts.collaboration})</span>
+      <span><span class="legend-line hierarchy"></span>Hierarchy (${counts.hierarchy})</span>
+      <span><span class="legend-line affiliation"></span>Institution / department (${counts.affiliation})</span>
+      <span><span class="legend-line topic"></span>Shared topic (${counts.topic})</span>
+      <span><span class="legend-line linked"></span>Linked profile (${counts.linked})</span>
+      ${counts.context ? `<span><span class="legend-line context"></span>Other (${counts.context})</span>` : ""}
     </div>
     ${email}
     <p><strong>Institution:</strong> ${node.institution || "Unknown"}</p>
