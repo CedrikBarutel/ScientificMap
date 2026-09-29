@@ -3,40 +3,44 @@ from __future__ import annotations
 from .models import Person, normalize_name, split_list
 
 
-AC_PROFESSORS = {
-    "jiehua chen",
-    "robert ganian",
-    "martin nöllenburg",
-    "günther raidl",
-    "stefan szeider",
-}
-AC_OFFICE = {"doris brazda"}
-AC_SYSTEM = {"johannes strasser"}
-AC_SCIENTIFIC = {
-    "maria bresich",
-    "thomas depian",
-    "sara di bartolomeo",
-    "alexander firbas",
-    "marlene gründel",
-    "christian hatschka",
-    "phuc hung hoang",
-    "enrico iurlano",
-    "liana khazaliya",
-    "markus kirchweger",
-    "martin kronegger",
-    "pablo manrique merchan",
-    "antonio mondejar",
-    "tomáš peitl",
-    "mathis rocton",
-    "morteza saghafian",
-    "manuel sorge",
-    "laurenz tomandl",
-    "johannes varga",
-    "florentina voboril",
-    "simon wietheger",
-    "hai xia",
-    "tianwei zhang",
-}
+def _names(values: set[str]) -> set[str]:
+    return {normalize_name(value) for value in values}
+
+
+AC_PROFESSORS = _names({
+    "Jiehua Chen",
+    "Robert Ganian",
+    "Martin Nöllenburg",
+    "Günther Raidl",
+    "Stefan Szeider",
+})
+AC_OFFICE = _names({"Doris Brazda"})
+AC_SYSTEM = _names({"Johannes Strasser"})
+AC_SCIENTIFIC = _names({
+    "Maria Bresich",
+    "Thomas Depian",
+    "Sara Di Bartolomeo",
+    "Alexander Firbas",
+    "Marlene GrüNdel",
+    "Christian Hatschka",
+    "Phuc Hung Hoang",
+    "Enrico Iurlano",
+    "Liana Khazaliya",
+    "Markus Kirchweger",
+    "Martin Kronegger",
+    "Pablo Manrique Merchan",
+    "Antonio Mondejar",
+    "Tomáš Peitl",
+    "Mathis Rocton",
+    "Morteza Saghafian",
+    "Manuel Sorge",
+    "Laurenz Tomandl",
+    "Johannes Varga",
+    "Florentina Voboril",
+    "Simon Wietheger",
+    "Hai Xia",
+    "Tianwei Zhang",
+})
 AC_CURRENT = AC_PROFESSORS | AC_OFFICE | AC_SYSTEM | AC_SCIENTIFIC
 
 AC_SOURCE = "https://www.ac.tuwien.ac.at/people/"
@@ -65,7 +69,7 @@ def _refine_ac(person: Person) -> None:
 
     if key in AC_PROFESSORS:
         person.role = "Professor"
-        if key == "stefan szeider":
+        if key == normalize_name("Stefan Szeider"):
             person.role = "Professor; Head of Algorithms and Complexity Group"
     elif key in AC_OFFICE:
         person.role = "Office Administration"
@@ -102,11 +106,11 @@ def _refine_ilsb(person: Person) -> None:
     person.location = person.location or "Getreidemarkt 9, 1060 Wien"
     person.affiliation_status = "current"
     key = normalize_name(person.name)
-    if key == "philipp j thurner":
+    if key == normalize_name("Philipp J. Thurner"):
         person.email = person.email or "pthurner@ilsb.tuwien.ac.at"
         person.role = "Professor of Biomechanics; Head of Institute"
         _append_sources(person, "https://www.tuwien.at/mwbw/ilsb/en/team/team-biomechanik/philipp-j-thurner/")
-    elif key == "orestis g andriotis":
+    elif key == normalize_name("Orestis G. Andriotis"):
         person.role = "Senior Scientist"
         _append_sources(person, "https://www.tuwien.at/mwbw/ilsb/en/team/team-biomechanik/orestis-g-andriotis/")
     _append_sources(person, ILSB_SOURCE)
@@ -121,22 +125,22 @@ def _refine_univie_comp(person: Person) -> None:
     person.unit = "Computational and Soft Matter Physics"
     person.affiliation_status = "current"
 
-    if key == "roberto cerbino":
+    if key == normalize_name("Roberto Cerbino"):
         person.group = "Cerbino Group"
         person.location = "Boltzmanngasse 5, 1090 Wien"
         person.email = person.email or "roberto.cerbino@univie.ac.at"
         person.role = "University Professor; Head of Cerbino Group"
-    elif key == "christoph dellago":
+    elif key == normalize_name("Christoph Dellago"):
         person.group = "Dellago Group"
         person.location = "Kolingasse 14–16, 1090 Wien"
         person.email = person.email or "christoph.dellago@univie.ac.at"
         person.role = "University Professor; Group Speaker"
-    elif key in {"christos n likos", "christos likos"}:
+    elif key in {normalize_name("Christos N. Likos"), normalize_name("Christos Likos")}:
         person.group = "Likos Group"
         person.location = "Kolingasse 14–16, 1090 Wien"
         person.email = person.email or "christos.likos@univie.ac.at"
         person.role = "University Professor; Head of Likos Group"
-    elif key == "sofia kantorovich":
+    elif key == normalize_name("Sofia Kantorovich"):
         person.group = "Kantorovich Group"
         person.location = "Kolingasse 14–16, 1090 Wien"
         person.role = "University Professor; Deputy Group Speaker"
@@ -150,7 +154,7 @@ def _refine_max_perutz(person: Person) -> None:
     person.unit = "Structural and Computational Biology"
     person.affiliation_status = "current"
 
-    if key == "jonas ries":
+    if key == normalize_name("Jonas Ries"):
         person.university = "University of Vienna"
         person.faculty = ""
         person.group = "Super-resolution microscopy for structural cell biology"
@@ -158,7 +162,7 @@ def _refine_max_perutz(person: Person) -> None:
         person.email = "jonas.ries@maxperutzlabs.ac.at"
         person.location = "Vienna BioCenter, Dr.-Bohr-Gasse 9, 1030 Wien"
         _append_sources(person, "https://www.maxperutzlabs.ac.at/research/research-groups/ries")
-    elif key in {"jörg menche", "jorg menche"}:
+    elif key in {normalize_name("Jörg Menche"), normalize_name("Jorg Menche")}:
         person.university = "University of Vienna"
         person.faculty = "Faculty of Mathematics"
         person.group = "Quantitative Modelling of Biological Networks"
@@ -166,7 +170,7 @@ def _refine_max_perutz(person: Person) -> None:
         person.email = person.email or "joerg.menche@univie.ac.at"
         person.location = "Vienna BioCenter, 1030 Wien"
         _append_sources(person, "https://www.maxperutzlabs.ac.at/research/research-groups/menche")
-    elif key == "thomas juffmann":
+    elif key == normalize_name("Thomas Juffmann"):
         person.university = "University of Vienna"
         person.faculty = "Faculty of Physics"
         person.group = "Quantum Optics and Microscopy"
