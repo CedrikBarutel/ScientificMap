@@ -34,8 +34,7 @@ Edges: 4466
 
 ## Missing Data
 
-- Profiles without email: 7
-- Jörg Menche (Max Perutz Labs)
+- Profiles without email: 6
 - Arun Ravi (TU Wien)
 - Christopher Bacher (TU Wien)
 - Cédrik Marius André Barutel (TU Wien)
