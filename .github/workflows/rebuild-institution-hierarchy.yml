@@ -1,0 +1,26 @@
+name: Rebuild institution hierarchy
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rebuild ScientificMap
+        run: |
+          pip install -r requirements.txt
+          python3 script.py build-graph
+          rm -f .github/workflows/rebuild-institution-hierarchy.yml
+      - name: Commit rebuilt outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Regenerate map with institutional hierarchy"
+          git push
