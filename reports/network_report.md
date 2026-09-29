@@ -37,16 +37,16 @@ Edges: 4405
 - Profiles without email: 12
 - Jörg Menche (Max Perutz Labs / University of Vienna)
 - Thomas Juffmann (Max Perutz Labs / University of Vienna)
+- Arun Ravi (TU Wien)
 - Christopher Bacher (TU Wien)
+- Cédrik Marius André Barutel (TU Wien)
 - Gerhard Schütz (TU Wien)
+- Jakob Roland Schindelwig (TU Wien)
 - Mario Brameshuber (TU Wien)
 - Philipp J. Thurner (TU Wien)
 - Christoph Dellago (University of Vienna)
 - Christos N. Likos (University of Vienna)
 - Roberto Cerbino (University of Vienna)
-- Cédrik Marius André Barutel (TU Wien)
-- Jakob Roland Schindelwig (TU Wien)
-- Arun Ravi (TU Wien)
 
 ## Seminar Seeds
 
