@@ -16,11 +16,15 @@ jobs:
         run: |
           pip install -r requirements.txt
           python3 script.py build-graph
-          rm -f .github/workflows/rebuild-institution-hierarchy.yml
       - name: Commit rebuilt outputs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add maps/network_map.html data/processed/people.csv data/processed/people.json data/processed/edges.csv data/processed/topics.csv reports/network_report.md
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+            exit 0
+          fi
           git commit -m "Regenerate map with institutional hierarchy"
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main
