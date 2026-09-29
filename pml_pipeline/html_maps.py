@@ -120,7 +120,7 @@ def relation_category(edge_type: str) -> str:
         "mentee",
     }:
         return "hierarchy"
-    if normalized in {"same_department", "same_institution"}:
+    if normalized in {"same_university", "same_faculty", "same_institute", "same_unit", "same_group", "same_department", "same_institution"}:
         return "affiliation"
     if normalized == "shared_keyword":
         return "topic"
@@ -220,9 +220,14 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
     aside h2 { margin: 0 0 12px; font-size: 19px; }
     aside p { margin: 8px 0; line-height: 1.4; }
     aside a { color: #245b86; overflow-wrap: anywhere; }
-    .node { cursor: pointer; stroke: #fff; stroke-width: 1.8; vector-effect: non-scaling-stroke; }
+    .node { cursor: pointer; stroke: #fff; stroke-width: 1.8; vector-effect: non-scaling-stroke; transition: opacity .15s ease; }
     .node:hover { stroke: #18202b; stroke-width: 2.3; }
     .link { stroke: #9aa6b2; stroke-opacity: .45; vector-effect: non-scaling-stroke; }
+    .link.affiliation-university { stroke: #6b7280; stroke-opacity: .10; }
+    .link.affiliation-faculty { stroke: #64748b; stroke-opacity: .18; }
+    .link.affiliation-institute { stroke: #52657a; stroke-opacity: .30; }
+    .link.affiliation-unit { stroke: #3f6476; stroke-opacity: .48; }
+    .link.affiliation-group { stroke: #315f73; stroke-opacity: .78; }
     .link.relation-collaboration { stroke: #356d9f; stroke-opacity: .95; }
     .link.relation-hierarchy { stroke: #b77928; stroke-opacity: .95; stroke-dasharray: 7 4; }
     .link.relation-affiliation { stroke: #4f8f55; stroke-opacity: .9; }
@@ -242,6 +247,21 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
     .label { font-size: 11px; pointer-events: auto; cursor: pointer; fill: #253040; paint-order: stroke; stroke: #fbfcfd; stroke-width: 3px; stroke-linejoin: round; }
     .muted { color: var(--muted); }
     .status { font-size: 12px; color: var(--muted); }
+    .hierarchy-legend {
+      position: absolute; left: 12px; bottom: 10px; z-index: 2;
+      display: flex; gap: 10px; flex-wrap: wrap; max-width: calc(100% - 24px);
+      padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px;
+      background: rgba(255,255,255,.9); color: var(--muted); font-size: 11px;
+      pointer-events: none;
+    }
+    .hierarchy-legend span::before {
+      content: ""; display: inline-block; width: 24px; margin-right: 5px;
+      vertical-align: middle; border-top: 2px solid #315f73;
+    }
+    .hierarchy-legend .unit::before { opacity: .62; }
+    .hierarchy-legend .institute::before { opacity: .40; }
+    .hierarchy-legend .faculty::before { opacity: .26; }
+    .hierarchy-legend .university::before { opacity: .14; }
 
     .content { max-width: 1050px; margin: 0 auto; padding: 26px 22px 50px; }
     .content h2 { margin-top: 0; }
@@ -288,13 +308,22 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
       <button id="modeInstitution" class="active" data-mode="institution">Institution</button>
       <button id="modeTopic" data-mode="topic">Topic</button>
     </div>
-    <label id="institutionLevelControl">Level
+    <label id="institutionLevelControl">Layout by
       <select id="institutionLevel">
         <option value="institution">University / institution</option>
         <option value="faculty">Faculty</option>
         <option value="institute">Institute</option>
         <option value="unit">Department / unit</option>
         <option value="group">Research group</option>
+      </select>
+    </label>
+    <label id="hierarchyDetailControl">Hierarchy detail
+      <select id="hierarchyDepth">
+        <option value="1">Group only</option>
+        <option value="2">+ Department / unit</option>
+        <option value="3" selected>+ Institute</option>
+        <option value="4">+ Faculty</option>
+        <option value="5">+ University</option>
       </select>
     </label>
     <label>Group <select id="groupFilter"><option value="">All groups</option></select></label>
@@ -310,6 +339,9 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
   </div>
   <div class="map-layout">
     <div class="map-wrap">
+      <div id="hierarchyLegend" class="hierarchy-legend">
+        <span>Group</span><span class="unit">Unit</span><span class="institute">Institute</span><span class="faculty">Faculty</span><span class="university">University</span>
+      </div>
       <svg id="map" viewBox="0 0 1000 720" role="img" aria-label="Academic network map">
         <g id="viewport"></g>
       </svg>
@@ -382,6 +414,9 @@ const labelsToggle = document.getElementById("labelsToggle");
 const visibleStatus = document.getElementById("visibleStatus");
 const institutionLevel = document.getElementById("institutionLevel");
 const institutionLevelControl = document.getElementById("institutionLevelControl");
+const hierarchyDetailControl = document.getElementById("hierarchyDetailControl");
+const hierarchyDepth = document.getElementById("hierarchyDepth");
+const hierarchyLegend = document.getElementById("hierarchyLegend");
 let mode = "institution";
 let institutionView = "institution";
 let transform = {x: 0, y: 0, k: 1};
@@ -400,6 +435,50 @@ function relationLinksFor(personId) {
   return data.links.filter(link =>
     link.source === personId || link.target === personId
   );
+}
+
+const affiliationDepth = {
+  same_group: 1,
+  same_unit: 2,
+  same_institute: 3,
+  same_faculty: 4,
+  same_university: 5,
+  same_department: 2,
+  same_institution: 5,
+};
+
+function normalLinksForMode() {
+  if (mode === "topic") {
+    return data.links.filter(link => ["topic", "collaboration", "hierarchy", "linked"].includes(link.category));
+  }
+  const maxDepth = Number(hierarchyDepth.value);
+  return data.links.filter(link => {
+    if (link.category === "affiliation") return (affiliationDepth[link.type] || 5) <= maxDepth;
+    return ["collaboration", "hierarchy", "linked"].includes(link.category);
+  });
+}
+
+function institutionalCloseness(a, b) {
+  if (!a || !b) return 0;
+  const levels = [
+    ["group_level", 5],
+    ["unit", 4],
+    ["institute", 3],
+    ["faculty", 2],
+    ["university", 1],
+  ];
+  for (const [field, depth] of levels) {
+    if (a[field] && b[field] && a[field] === b[field]) return depth;
+  }
+  return 0;
+}
+
+function nodeOpacity(node) {
+  if (mode !== "institution" || !selectedNodeId) return 0.94;
+  if (node.id === selectedNodeId) return 1;
+  const selected = currentNodeMap().get(selectedNodeId);
+  const closeness = institutionalCloseness(node, selected);
+  return [0.18, 0.34, 0.50, 0.66, 0.82, 0.98][closeness];
 }
 function visibleNodesForState() {
   if (relationsOnly && selectedNodeId) {
@@ -470,7 +549,7 @@ function draw() {
     ? `${Math.max(0, visibleNodes.length - 1)} direct relations`
     : `${visibleNodes.length} / ${view.nodes.length} people`;
 
-  const linksToDraw = relationsOnly && selectedNodeId ? relationLinksFor(selectedNodeId) : data.links;
+  const linksToDraw = relationsOnly && selectedNodeId ? relationLinksFor(selectedNodeId) : normalLinksForMode();
   for (const link of linksToDraw) {
     if (!visible.has(link.source) || !visible.has(link.target)) continue;
     const source = nodeById.get(link.source);
@@ -480,8 +559,14 @@ function draw() {
     line.setAttribute("x1", source.x); line.setAttribute("y1", source.y);
     line.setAttribute("x2", target.x); line.setAttribute("y2", target.y);
     line.setAttribute("class", "link");
-    if (relationsOnly) line.classList.add(`relation-${link.category || "context"}`);
-    line.setAttribute("stroke-width", Math.max(0.8, Math.min(4, link.weight)));
+    if (link.category === "affiliation") {
+      const level = link.type.replace("same_", "");
+      line.classList.add(`affiliation-${level}`);
+      line.setAttribute("stroke-width", Math.max(0.7, Math.min(2.4, 0.6 + 1.7 * link.weight)));
+    } else {
+      if (relationsOnly) line.classList.add(`relation-${link.category || "context"}`);
+      line.setAttribute("stroke-width", Math.max(0.8, Math.min(4, link.weight)));
+    }
     viewport.appendChild(line);
   }
 
@@ -490,6 +575,7 @@ function draw() {
     circle.setAttribute("cx", node.x); circle.setAttribute("cy", node.y);
     circle.setAttribute("r", 8); circle.setAttribute("fill", color(node.group));
     circle.setAttribute("class", "node");
+    circle.setAttribute("opacity", nodeOpacity(node));
     if (node.id === selectedNodeId) circle.classList.add("selected");
     circle.addEventListener("pointerdown", event => event.stopPropagation());
     circle.addEventListener("click", event => { event.stopPropagation(); show(node); });
@@ -498,6 +584,7 @@ function draw() {
       const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
       label.setAttribute("x", node.x + 11); label.setAttribute("y", node.y + 4);
       label.setAttribute("class", "label"); label.textContent = node.name;
+      label.setAttribute("fill-opacity", Math.max(0.35, nodeOpacity(node)));
       label.addEventListener("pointerdown", event => event.stopPropagation());
       label.addEventListener("click", event => { event.stopPropagation(); show(node); });
       viewport.appendChild(label);
@@ -554,6 +641,8 @@ function setMode(nextMode) {
   mode = nextMode;
   document.querySelectorAll("[data-mode]").forEach(button => button.classList.toggle("active", button.dataset.mode === mode));
   institutionLevelControl.style.display = mode === "institution" ? "" : "none";
+  hierarchyDetailControl.style.display = mode === "institution" ? "" : "none";
+  hierarchyLegend.style.display = mode === "institution" ? "flex" : "none";
   populateGroups();
   draw();
   fitVisible();
@@ -572,6 +661,7 @@ institutionLevel.addEventListener("change", () => {
   draw();
   fitVisible();
 });
+hierarchyDepth.addEventListener("change", draw);
 groupFilter.addEventListener("change", () => { draw(); fitVisible(); });
 search.addEventListener("input", () => { draw(); fitVisible(); });
 labelsToggle.addEventListener("change", draw);
