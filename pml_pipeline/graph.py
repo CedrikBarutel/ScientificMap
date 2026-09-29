@@ -5,7 +5,7 @@ import csv
 from itertools import combinations
 from typing import Iterable
 
-from .html_maps import render_network_map
+from .html_maps import render_tool
 from .models import Edge, Person, TOPIC_FIELDS, normalize_keyword, normalize_name
 from .storage import MAPS_DIR, read_people, read_publications, topics_csv_path, write_edges
 
@@ -154,6 +154,6 @@ def build_graph_outputs() -> list[Edge]:
     write_edges(edges)
     topic_rows = build_topics(people)
     write_topics(topic_rows)
-    render_network_map(people, edges, "Academic Network", MAPS_DIR / "network_map.html")
+    render_tool(people, edges, MAPS_DIR / "network_map.html")
     write_cluster_report(people, edges)
     return edges
