@@ -1,0 +1,26 @@
+# Configure official academic sources here. Keep V1 scoped to official pages
+# and publication metadata; do not add broad web-search URLs.
+sources:
+  - institution: "Institute of Science and Technology Austria"
+    department: ""
+    seed_urls:
+      - "https://ista.ac.at/en/research/faculty/"
+    allowed_domains:
+      - "ista.ac.at"
+    rate_limit_seconds: 1.0
+    max_depth: 1
+    profile_selectors:
+      - ".person"
+      - ".staff-member"
+      - ".profile"
+      - "article"
+
+  - institution: "University of Vienna"
+    department: ""
+    seed_urls:
+      - "https://www.univie.ac.at/en/research/"
+    allowed_domains:
+      - "univie.ac.at"
+    rate_limit_seconds: 1.0
+    max_depth: 1
+
