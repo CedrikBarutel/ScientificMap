@@ -1,0 +1,16 @@
+sources:
+  - institution: "TU Wien"
+    department: "Algorithms and Complexity Group"
+    seed_urls:
+      - "https://www.ac.tuwien.ac.at/people/"
+    allowed_domains:
+      - "ac.tuwien.ac.at"
+    rate_limit_seconds: 0.5
+    max_depth: 1
+    profile_selectors:
+      - ".person"
+      - ".profile"
+      - ".team-member"
+      - ".staff-member"
+      - "article"
+      - "main"
