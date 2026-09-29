@@ -17,21 +17,29 @@ def add_edge(edges: list[Edge], source: Person, target: Person, edge_type: str, 
     edges.append(Edge(source.person_id, target.person_id, edge_type, weight, url, evidence))
 
 
-def same_institution_edges(people: list[Person]) -> list[Edge]:
+HIERARCHY_LEVELS = [
+    ("same_university", "university", 0.20),
+    ("same_faculty", "faculty", 0.35),
+    ("same_institute", "institute", 0.55),
+    ("same_unit", "unit", 0.75),
+    ("same_group", "group", 1.00),
+]
+
+
+def hierarchy_affiliation_edges(people: list[Person]) -> list[Edge]:
+    """Add one affiliation edge per pair at their deepest shared hierarchy level."""
     edges: list[Edge] = []
-    by_institution: dict[str, list[Person]] = defaultdict(list)
-    by_department: dict[tuple[str, str], list[Person]] = defaultdict(list)
-    for person in people:
-        if person.institution:
-            by_institution[person.institution.lower()].append(person)
-        if person.institution and person.department:
-            by_department[(person.institution.lower(), person.department.lower())].append(person)
-    for institution, members in by_institution.items():
-        for source, target in combinations(members, 2):
-            add_edge(edges, source, target, "same_institution", 0.25, f"Both at {source.institution}")
-    for (_institution, _department), members in by_department.items():
-        for source, target in combinations(members, 2):
-            add_edge(edges, source, target, "same_department", 0.5, f"Both in {source.department}")
+    for source, target in combinations(people, 2):
+        shared: tuple[str, str, float] | None = None
+        for edge_type, field_name, weight in HIERARCHY_LEVELS:
+            source_value = getattr(source, field_name, "") or ""
+            target_value = getattr(target, field_name, "") or ""
+            if source_value and target_value and source_value.casefold() == target_value.casefold():
+                shared = (edge_type, source_value, weight)
+        if shared is None:
+            continue
+        edge_type, value, weight = shared
+        add_edge(edges, source, target, edge_type, weight, f"Shared {edge_type.removeprefix('same_')}: {value}")
     return edges
 
 
@@ -200,7 +208,7 @@ def build_graph_outputs() -> list[Edge]:
     people = refine_people_metadata(merge_manual_people(read_people()))
     write_people(people)
     edges = []
-    edges.extend(same_institution_edges(people))
+    edges.extend(hierarchy_affiliation_edges(people))
     edges.extend(shared_keyword_edges(people))
     edges.extend(coauthor_edges(people))
     edges.extend(linked_profile_edges(people))
