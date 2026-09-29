@@ -7,7 +7,7 @@ from typing import Iterable
 
 from .html_maps import render_tool
 from .models import Edge, Person, TOPIC_FIELDS, normalize_keyword, normalize_name
-from .storage import MAPS_DIR, read_people, read_publications, topics_csv_path, write_edges
+from .storage import MAPS_DIR, RAW_DIR, read_people, read_publications, topics_csv_path, write_edges, write_people
 
 
 def add_edge(edges: list[Edge], source: Person, target: Person, edge_type: str, weight: float, evidence: str, url: str = "") -> None:
@@ -79,6 +79,57 @@ def linked_profile_edges(people: list[Person]) -> list[Edge]:
     return edges
 
 
+def read_manual_people() -> list[Person]:
+    path = RAW_DIR / "manual_people.csv"
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as handle:
+        return [Person.from_row(row) for row in csv.DictReader(handle)]
+
+
+def merge_manual_people(people: list[Person]) -> list[Person]:
+    by_id = {person.person_id: person for person in people}
+    by_name = {normalize_name(person.name): person.person_id for person in people}
+    for person in read_manual_people():
+        existing_id = by_name.get(normalize_name(person.name))
+        if existing_id and existing_id in by_id:
+            merged = by_id[existing_id].merge(person)
+            by_id[existing_id] = merged
+            by_name[normalize_name(merged.name)] = existing_id
+        else:
+            by_id[person.person_id] = person
+            by_name[normalize_name(person.name)] = person.person_id
+    return list(by_id.values())
+
+
+def manual_relation_edges(people: list[Person]) -> list[Edge]:
+    path = RAW_DIR / "manual_relations.csv"
+    if not path.exists():
+        return []
+    by_name = {normalize_name(person.name): person for person in people}
+    edges: list[Edge] = []
+    with path.open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            source = by_name.get(normalize_name(row.get("source_name", "")))
+            target = by_name.get(normalize_name(row.get("target_name", "")))
+            if not source or not target:
+                continue
+            try:
+                weight = float(row.get("weight") or 2.0)
+            except ValueError:
+                weight = 2.0
+            add_edge(
+                edges,
+                source,
+                target,
+                row.get("edge_type", "relation") or "relation",
+                weight,
+                row.get("evidence_text", ""),
+                row.get("evidence_url", ""),
+            )
+    return edges
+
+
 def build_topics(people: list[Person]) -> list[dict[str, str]]:
     topic_people: dict[str, list[Person]] = defaultdict(list)
     for person in people:
@@ -145,12 +196,14 @@ def write_cluster_report(people: list[Person], edges: list[Edge]) -> None:
 
 
 def build_graph_outputs() -> list[Edge]:
-    people = read_people()
+    people = merge_manual_people(read_people())
+    write_people(people)
     edges = []
     edges.extend(same_institution_edges(people))
     edges.extend(shared_keyword_edges(people))
     edges.extend(coauthor_edges(people))
     edges.extend(linked_profile_edges(people))
+    edges.extend(manual_relation_edges(people))
     write_edges(edges)
     topic_rows = build_topics(people)
     write_topics(topic_rows)
