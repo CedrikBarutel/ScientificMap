@@ -8,7 +8,7 @@ No local download is needed. The HTML file stays in this GitHub repository and c
 
 - [Interactive academic network map](https://htmlpreview.github.io/?https://github.com/CedrikBarutel/ScientificMap/blob/main/maps/network_map.html)
 
-The map can be switched between **Institution** and **Topic** grouping. Use the **+ / − / Reset** controls or the mouse wheel to zoom, and drag the map to pan.
+The **Explorer** can switch between **Institution** and **Topic** grouping. It supports **+ / − zoom, wheel zoom, drag-to-pan, Fit visible, Reset, search, group filters, and label toggling**. The same page also includes **Add info** and **Algorithms** tabs.
 
 ## Quick start
 
