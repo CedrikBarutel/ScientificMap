@@ -2,12 +2,13 @@
 
 Local Python pipeline for collecting public academic profiles, including location/provenance metadata, enriching them with publication metadata, creating maps, suggesting seminar groups, and exporting reviewed campaign contacts.
 
-## View the maps
+## View the map
 
-No local download is needed. The HTML files stay in this GitHub repository and can be opened directly in a browser through HTMLPreview:
+No local download is needed. The HTML file stays in this GitHub repository and can be opened directly in a browser through HTMLPreview:
 
-- [Institution map](https://htmlpreview.github.io/?https://github.com/CedrikBarutel/ScientificMap/blob/main/maps/institution_map.html)
-- [Research map](https://htmlpreview.github.io/?https://github.com/CedrikBarutel/ScientificMap/blob/main/maps/research_map.html)
+- [Interactive academic network map](https://htmlpreview.github.io/?https://github.com/CedrikBarutel/ScientificMap/blob/main/maps/network_map.html)
+
+The map can be switched between **Institution** and **Topic** grouping. Use the **+ / − / Reset** controls or the mouse wheel to zoom, and drag the map to pan.
 
 ## Quick start
 
@@ -28,8 +29,7 @@ python3 script.py export-campaign --campaign-name "ML seminar Vienna" --topic "m
 - `data/processed/edges.csv`
 - `data/processed/topics.csv`
 - `data/processed/campaign_contacts.csv`
-- `maps/institution_map.html`
-- `maps/research_map.html`
+- `maps/network_map.html`
 - `reports/network_report.md`
 
 ## Compliance note
