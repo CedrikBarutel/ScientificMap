@@ -13,15 +13,16 @@ VIEW_HEIGHT = 720
 
 
 def institution_hierarchy(person: Person) -> dict[str, str]:
-    parts = [part.strip() for part in person.department.split("/") if part.strip()]
-    university = person.institution or "Unknown university"
-    institute = parts[0] if parts else university
-    department = parts[-2] if len(parts) >= 2 else (parts[0] if parts else university)
-    group = parts[-1] if parts else institute
+    top = person.university or person.institution or "Unknown institution"
+    faculty = person.faculty or top
+    institute = person.institute or faculty
+    unit = person.unit or institute
+    group = person.group or unit
     return {
-        "university": university,
+        "institution": top,
+        "faculty": faculty,
         "institute": institute,
-        "department_level": department,
+        "unit": unit,
         "group_level": group,
     }
 
@@ -31,15 +32,17 @@ def group_value(person: Person, group_by: str) -> str:
         keywords = person.research_keywords or person.publication_keywords
         return keywords[0] if keywords else "Unknown topic"
     hierarchy = institution_hierarchy(person)
-    if group_by == "university":
-        return hierarchy["university"]
+    if group_by == "institution":
+        return hierarchy["institution"]
+    if group_by == "faculty":
+        return hierarchy["faculty"]
     if group_by == "institute":
         return hierarchy["institute"]
-    if group_by == "department":
-        return hierarchy["department_level"]
+    if group_by == "unit":
+        return hierarchy["unit"]
     if group_by == "group":
         return hierarchy["group_level"]
-    return hierarchy["university"]
+    return hierarchy["institution"]
 
 
 def build_nodes(people: list[Person], group_by: str) -> list[dict]:
@@ -81,10 +84,12 @@ def build_nodes(people: list[Person], group_by: str) -> list[dict]:
                     "email": person.email,
                     "institution": person.institution,
                     "department": person.department,
-                    "university": hierarchy["university"],
-                    "institute": hierarchy["institute"],
-                    "department_level": hierarchy["department_level"],
-                    "group_level": hierarchy["group_level"],
+                    "university": person.university or person.institution,
+                    "faculty": person.faculty,
+                    "institute": person.institute,
+                    "unit": person.unit,
+                    "group_level": person.group or hierarchy["group_level"],
+                    "affiliation_status": person.affiliation_status,
                     "location": person.location,
                     "role": person.role,
                     "profile_url": person.profile_url,
@@ -142,9 +147,10 @@ def build_links(people: list[Person], edges: list[Edge]) -> list[dict]:
 
 def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> None:
     view_specs = [
-        ("university", "University"),
-        ("institute", "Institute / Faculty"),
-        ("department", "Department / Unit"),
+        ("institution", "University / institution"),
+        ("faculty", "Faculty"),
+        ("institute", "Institute"),
+        ("unit", "Department / unit"),
         ("group", "Research group"),
         ("topic", "Research topic"),
     ]
@@ -284,9 +290,10 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
     </div>
     <label id="institutionLevelControl">Level
       <select id="institutionLevel">
-        <option value="university">University</option>
-        <option value="institute">Institute / Faculty</option>
-        <option value="department">Department / Unit</option>
+        <option value="institution">University / institution</option>
+        <option value="faculty">Faculty</option>
+        <option value="institute">Institute</option>
+        <option value="unit">Department / unit</option>
         <option value="group">Research group</option>
       </select>
     </label>
@@ -320,7 +327,13 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
         <label>Name<input data-field="name" placeholder="Name"></label>
         <label>Email<input data-field="email" placeholder="name@institution.org"></label>
         <label>Institution<input data-field="institution" placeholder="Institution"></label>
-        <label>Department<input data-field="department" placeholder="Department / group"></label>
+        <label>University<input data-field="university" placeholder="University"></label>
+        <label>Faculty<input data-field="faculty" placeholder="Faculty"></label>
+        <label>Institute<input data-field="institute" placeholder="Institute"></label>
+        <label>Department / Unit<input data-field="unit" placeholder="Department / unit"></label>
+        <label>Research group<input data-field="group" placeholder="Research group"></label>
+        <label>Legacy department<input data-field="department" placeholder="Original department string"></label>
+        <label>Status<input data-field="affiliation_status" placeholder="current / alumni / former"></label>
         <label>Location<input data-field="location" placeholder="City or address"></label>
         <label>Role<input data-field="role" placeholder="PI, postdoc, PhD, ..."></label>
         <label class="wide">Profile URL<input data-field="profile_url" placeholder="https://..."></label>
@@ -370,7 +383,7 @@ const visibleStatus = document.getElementById("visibleStatus");
 const institutionLevel = document.getElementById("institutionLevel");
 const institutionLevelControl = document.getElementById("institutionLevelControl");
 let mode = "institution";
-let institutionView = "university";
+let institutionView = "institution";
 let transform = {x: 0, y: 0, k: 1};
 let dragging = false;
 let lastPointer = null;
@@ -403,8 +416,8 @@ function matches(node) {
   const selected = groupFilter.value;
   const query = search.value.trim().toLowerCase();
   const blob = [
-    node.name, node.email, node.university, node.institute, node.department_level,
-    node.group_level, node.department, node.location, node.role, node.group,
+    node.name, node.email, node.university, node.faculty, node.institute, node.unit,
+    node.group_level, node.department, node.affiliation_status, node.location, node.role, node.group,
     node.keywords.join(" "), node.notes
   ].join(" ").toLowerCase();
   return (!selected || node.group === selected) && (!query || blob.includes(query));
@@ -518,9 +531,11 @@ function show(node) {
     </div>
     ${email}
     <p><strong>University:</strong> ${node.university || "Unknown"}</p>
-    <p><strong>Institute / Faculty:</strong> ${node.institute || "Unknown"}</p>
-    <p><strong>Department / Unit:</strong> ${node.department_level || "Unknown"}</p>
+    <p><strong>Faculty:</strong> ${node.faculty || "Unknown"}</p>
+    <p><strong>Institute:</strong> ${node.institute || "Unknown"}</p>
+    <p><strong>Department / Unit:</strong> ${node.unit || "Unknown"}</p>
     <p><strong>Group:</strong> ${node.group_level || "Unknown"}</p>
+    <p><strong>Status:</strong> ${node.affiliation_status || "Unknown"}</p>
     <p><strong>Location:</strong> ${node.location || "Unknown"}</p>
     <p><strong>Role:</strong> ${node.role || "Unknown"}</p>
     <p><strong>${currentView().label}:</strong> ${node.group}</p>
@@ -590,7 +605,7 @@ function stopDrag() { dragging = false; lastPointer = null; svg.classList.remove
 svg.addEventListener("pointerup", stopDrag);
 svg.addEventListener("pointercancel", stopDrag);
 
-const personFields = ["person_id","name","email","institution","department","location","role","profile_url","research_keywords","publication_keywords","source_urls","confidence_score","last_seen_at","notes"];
+const personFields = ["person_id","name","email","institution","university","faculty","institute","unit","group","department","affiliation_status","location","role","profile_url","research_keywords","publication_keywords","source_urls","confidence_score","last_seen_at","notes"];
 function csvEscape(value) {
   const text = String(value ?? "");
   return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
