@@ -1,7 +1,7 @@
 # Academic Network Report
 
 People: 78
-Edges: 4472
+Edges: 2619
 
 ## Institutions
 
