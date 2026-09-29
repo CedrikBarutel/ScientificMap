@@ -1,0 +1,29 @@
+name: Rebuild hierarchy styling
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rebuild ScientificMap
+        run: |
+          pip install -r requirements.txt
+          python3 script.py build-graph
+      - name: Commit hierarchy outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/processed/edges.csv maps/network_map.html reports/network_report.md
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+            exit 0
+          fi
+          git commit -m "Regenerate map with graded institutional hierarchy"
+          git push origin HEAD:main
