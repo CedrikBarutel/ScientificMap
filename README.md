@@ -4,9 +4,9 @@ Local Python pipeline for collecting public academic profiles, including locatio
 
 ## View the map
 
-No local download is needed. The HTML file stays in this GitHub repository and can be opened directly in a browser through HTMLPreview:
+No local download is needed. The HTML file stays in this GitHub repository and can be opened directly in a browser through a GitHub-backed HTML renderer:
 
-- [Interactive academic network map](https://htmlpreview.github.io/?https://github.com/CedrikBarutel/ScientificMap/blob/main/maps/network_map.html)
+- [Interactive academic network map](https://raw.githack.com/CedrikBarutel/ScientificMap/main/maps/network_map.html)
 
 The **Explorer** can switch between **Institution** and **Topic** grouping. It supports **+ / − zoom, wheel zoom, drag-to-pan, Fit visible, Reset, search, group filters, and label toggling**. The same page also includes **Add info** and **Algorithms** tabs.
 
