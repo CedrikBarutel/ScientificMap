@@ -75,6 +75,8 @@ def _refine_ac(person: Person) -> None:
         person.role = "Office Administration"
     elif key in AC_SYSTEM:
         person.role = "System Administration"
+    elif key == normalize_name("Tomáš Peitl"):
+        person.role = "University Assistant"
     elif key in AC_SCIENTIFIC and not person.role:
         person.role = "Scientific Staff"
     elif person.affiliation_status == "alumni" and not person.role:
@@ -84,6 +86,7 @@ def _refine_ac(person: Person) -> None:
 
 
 def _refine_tu_biophysics(person: Person) -> None:
+    key = normalize_name(person.name)
     parts = [part.strip() for part in person.department.split("/") if part.strip()]
     person.institution = "TU Wien"
     person.university = "TU Wien"
@@ -93,7 +96,20 @@ def _refine_tu_biophysics(person: Person) -> None:
     person.group = parts[-1] if parts else person.group
     person.location = person.location or "Getreidemarkt 9 / Lehargasse 6, 1060 Wien"
     person.affiliation_status = person.affiliation_status or "current"
-    _append_sources(person, BIOPHYSICS_SOURCE)
+
+    if key == normalize_name("Gerhard Schütz"):
+        person.email = person.email or "schuetz@iap.tuwien.ac.at"
+    elif key == normalize_name("Mario Brameshuber"):
+        person.email = person.email or "brameshuber@iap.tuwien.ac.at"
+    elif key in {
+        normalize_name("Cédrik Marius André Barutel"),
+        normalize_name("Jakob Roland Schindelwig"),
+        normalize_name("Arun Ravi"),
+    }:
+        person.role = "Project Assistant; PhD Student"
+        person.profile_url = person.profile_url or "https://www.tuwien.at/en/phy/iap/biophysics/team"
+
+    _append_sources(person, BIOPHYSICS_SOURCE, "https://www.tuwien.at/en/phy/iap/biophysics/team")
 
 
 def _refine_ilsb(person: Person) -> None:
