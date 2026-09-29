@@ -1,7 +1,7 @@
 # Academic Network Report
 
 People: 78
-Edges: 4466
+Edges: 4472
 
 ## Institutions
 
@@ -34,13 +34,11 @@ Edges: 4466
 
 ## Missing Data
 
-- Profiles without email: 6
+- Profiles without email: 4
 - Arun Ravi (TU Wien)
 - Christopher Bacher (TU Wien)
 - Cédrik Marius André Barutel (TU Wien)
-- Gerhard Schütz (TU Wien)
 - Jakob Roland Schindelwig (TU Wien)
-- Mario Brameshuber (TU Wien)
 
 ## Seminar Seeds
 
