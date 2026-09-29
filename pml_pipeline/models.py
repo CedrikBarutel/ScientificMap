@@ -12,7 +12,13 @@ PERSON_FIELDS = [
     "name",
     "email",
     "institution",
+    "university",
+    "faculty",
+    "institute",
+    "unit",
+    "group",
     "department",
+    "affiliation_status",
     "location",
     "role",
     "profile_url",
@@ -140,7 +146,13 @@ class Person:
     name: str
     email: str = ""
     institution: str = ""
+    university: str = ""
+    faculty: str = ""
+    institute: str = ""
+    unit: str = ""
+    group: str = ""
     department: str = ""
+    affiliation_status: str = ""
     location: str = ""
     role: str = ""
     profile_url: str = ""
@@ -156,7 +168,13 @@ class Person:
         self.name = normalize_text(self.name)
         self.email = normalize_email(self.email)
         self.institution = normalize_text(self.institution)
+        self.university = normalize_text(self.university)
+        self.faculty = normalize_text(self.faculty)
+        self.institute = normalize_text(self.institute)
+        self.unit = normalize_text(self.unit)
+        self.group = normalize_text(self.group)
         self.department = normalize_text(self.department)
+        self.affiliation_status = normalize_text(self.affiliation_status)
         self.location = normalize_text(self.location)
         self.role = normalize_text(self.role)
         self.profile_url = normalize_text(self.profile_url)
@@ -205,7 +223,13 @@ class Person:
             name=primary.name or secondary.name,
             email=primary.email or secondary.email,
             institution=primary.institution or secondary.institution,
+            university=primary.university or secondary.university,
+            faculty=primary.faculty or secondary.faculty,
+            institute=primary.institute or secondary.institute,
+            unit=primary.unit or secondary.unit,
+            group=primary.group or secondary.group,
             department=primary.department or secondary.department,
+            affiliation_status=primary.affiliation_status or secondary.affiliation_status,
             location=primary.location or secondary.location,
             role=primary.role or secondary.role,
             profile_url=primary.profile_url or secondary.profile_url,
