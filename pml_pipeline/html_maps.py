@@ -162,7 +162,7 @@ def render_tool(people: list[Person], edges: list[Edge], output_path: Path) -> N
     .node { cursor: pointer; stroke: #fff; stroke-width: 1.8; vector-effect: non-scaling-stroke; }
     .node:hover { stroke: #18202b; stroke-width: 2.3; }
     .link { stroke: #9aa6b2; stroke-opacity: .45; vector-effect: non-scaling-stroke; }
-    .label { font-size: 11px; pointer-events: none; fill: #253040; paint-order: stroke; stroke: #fbfcfd; stroke-width: 3px; stroke-linejoin: round; }
+    .label { font-size: 11px; pointer-events: auto; cursor: pointer; fill: #253040; paint-order: stroke; stroke: #fbfcfd; stroke-width: 3px; stroke-linejoin: round; }
     .muted { color: var(--muted); }
     .status { font-size: 12px; color: var(--muted); }
 
@@ -369,12 +369,15 @@ function draw() {
     circle.setAttribute("cx", node.x); circle.setAttribute("cy", node.y);
     circle.setAttribute("r", 8); circle.setAttribute("fill", color(node.group));
     circle.setAttribute("class", "node");
+    circle.addEventListener("pointerdown", event => event.stopPropagation());
     circle.addEventListener("click", event => { event.stopPropagation(); show(node); });
     viewport.appendChild(circle);
     if (labelsToggle.checked) {
       const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
       label.setAttribute("x", node.x + 11); label.setAttribute("y", node.y + 4);
       label.setAttribute("class", "label"); label.textContent = node.name;
+      label.addEventListener("pointerdown", event => event.stopPropagation());
+      label.addEventListener("click", event => { event.stopPropagation(); show(node); });
       viewport.appendChild(label);
     }
   }
@@ -423,7 +426,13 @@ svg.addEventListener("wheel", event => {
   const y = (event.clientY - rect.top) * (720 / rect.height);
   zoomBy(event.deltaY < 0 ? 1.12 : 0.89, x, y);
 }, {passive: false});
-svg.addEventListener("pointerdown", event => { dragging = true; lastPointer = {x: event.clientX, y: event.clientY}; svg.classList.add("dragging"); svg.setPointerCapture(event.pointerId); });
+svg.addEventListener("pointerdown", event => {
+  if (event.target.classList && (event.target.classList.contains("node") || event.target.classList.contains("label"))) return;
+  dragging = true;
+  lastPointer = {x: event.clientX, y: event.clientY};
+  svg.classList.add("dragging");
+  svg.setPointerCapture(event.pointerId);
+});
 svg.addEventListener("pointermove", event => {
   if (!dragging || !lastPointer) return;
   const rect = svg.getBoundingClientRect();
