@@ -1,4 +1,65 @@
 source_person_id,target_person_id,edge_type,weight,evidence_url,evidence_text
+p_0fb45048ee50,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_18841830cbeb,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_1f09b5d32cdd,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_21213f62ac00,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_2509f720aa30,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_27b513013d06,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_2e603dc1c71c,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_37743812e7b8,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_38c8b73d6a2b,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_42e2f5bb234f,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_474b99321c8e,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_498e29fa4608,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_4cab06668830,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_4cc6a124d188,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_4dc4ecc133d9,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_4fc01d6873af,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_57e81a33799a,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_5ba48ee11139,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_6b040c1875f9,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_77cacdbdd3f6,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_7875be5ed0ba,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_809af1dac0a0,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_83c0e77cd9b3,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_8a50c5542f0a,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_92f17fe87fab,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_96c3dfdf7ef9,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_98110fe30104,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_98cd99958f30,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_9bbf7296597f,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_9d16806563dc,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_a3572a58b762,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_a41459cdd768,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_a94928a1c583,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_ad6993f05ccc,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_b3a0f268994f,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_b6f5c5402d18,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_b7d7331a7460,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_bc88d0286909,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_bdf69ab58730,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_c28424c7cff8,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_c4e79a8aedca,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_c8b99d53c18a,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_ca1dc2eed7f6,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_ca4a99f213dc,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_cc44e04be967,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_d48e4ef31772,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_d54412518e1d,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_d59111e0cf6d,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_d6acc5297b85,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_d96513056fad,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_d979c0609bb0,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_e3bdbee9f327,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_f0796af1f964,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_f5aae7a1da7f,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_f69c45a1adca,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_f6ca4ba0d6a3,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_f91fbfeafc03,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_f9a0dfb82f0c,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_faf0432d7287,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_faf72768d249,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
+p_fc085ff11435,p_fe4fedd24693,linked_profile,0.75,https://www.ac.tuwien.ac.at/,Profile source links to Stefan Szeider
 p_08428cfb4434,p_0f1c5362be36,same_department,0.50,,Both in Institute of Applied Physics / Biophysics Research Unit / Theory of Living Matter Group
 p_08428cfb4434,p_83b541e9bcf1,same_department,0.50,,Both in Institute of Applied Physics / Biophysics Research Unit / Theory of Living Matter Group
 p_08428cfb4434,p_dc4fb3952406,same_department,0.50,,Both in Institute of Applied Physics / Biophysics Research Unit / Theory of Living Matter Group
@@ -2617,8 +2678,8 @@ p_38c8b73d6a2b,p_faf0432d7287,same_institution,0.25,,Both at TU Wien
 p_38c8b73d6a2b,p_faf72768d249,same_institution,0.25,,Both at TU Wien
 p_38c8b73d6a2b,p_fc085ff11435,same_institution,0.25,,Both at TU Wien
 p_38c8b73d6a2b,p_fe4fedd24693,same_institution,0.25,,Both at TU Wien
-p_3cbeb63407f3,p_daa023c4cfe0,same_institution,0.25,,Both at Max Perutz Labs / University of Vienna
-p_3cbeb63407f3,p_e2160261479b,same_institution,0.25,,Both at Max Perutz Labs / University of Vienna
+p_3cbeb63407f3,p_daa023c4cfe0,same_institution,0.25,,Both at Max Perutz Labs
+p_3cbeb63407f3,p_e2160261479b,same_institution,0.25,,Both at Max Perutz Labs
 p_3f0f692d7d18,p_42e2f5bb234f,same_institution,0.25,,Both at TU Wien
 p_3f0f692d7d18,p_474b99321c8e,same_institution,0.25,,Both at TU Wien
 p_3f0f692d7d18,p_498e29fa4608,same_institution,0.25,,Both at TU Wien
@@ -4325,7 +4386,7 @@ p_d979c0609bb0,p_faf0432d7287,same_institution,0.25,,Both at TU Wien
 p_d979c0609bb0,p_faf72768d249,same_institution,0.25,,Both at TU Wien
 p_d979c0609bb0,p_fc085ff11435,same_institution,0.25,,Both at TU Wien
 p_d979c0609bb0,p_fe4fedd24693,same_institution,0.25,,Both at TU Wien
-p_daa023c4cfe0,p_e2160261479b,same_institution,0.25,,Both at Max Perutz Labs / University of Vienna
+p_daa023c4cfe0,p_e2160261479b,same_institution,0.25,,Both at Max Perutz Labs
 p_dc4fb3952406,p_e3bdbee9f327,same_institution,0.25,,Both at TU Wien
 p_dc4fb3952406,p_f0796af1f964,same_institution,0.25,,Both at TU Wien
 p_dc4fb3952406,p_f5aae7a1da7f,same_institution,0.25,,Both at TU Wien

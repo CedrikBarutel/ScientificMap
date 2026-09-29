@@ -1,13 +1,13 @@
 # Academic Network Report
 
 People: 78
-Edges: 4405
+Edges: 4466
 
 ## Institutions
 
 - TU Wien: 71
 - University of Vienna: 4
-- Max Perutz Labs / University of Vienna: 3
+- Max Perutz Labs: 3
 
 ## Main Topics
 
@@ -34,19 +34,14 @@ Edges: 4405
 
 ## Missing Data
 
-- Profiles without email: 12
-- Jörg Menche (Max Perutz Labs / University of Vienna)
-- Thomas Juffmann (Max Perutz Labs / University of Vienna)
+- Profiles without email: 7
+- Jörg Menche (Max Perutz Labs)
 - Arun Ravi (TU Wien)
 - Christopher Bacher (TU Wien)
 - Cédrik Marius André Barutel (TU Wien)
 - Gerhard Schütz (TU Wien)
 - Jakob Roland Schindelwig (TU Wien)
 - Mario Brameshuber (TU Wien)
-- Philipp J. Thurner (TU Wien)
-- Christoph Dellago (University of Vienna)
-- Christos N. Likos (University of Vienna)
-- Roberto Cerbino (University of Vienna)
 
 ## Seminar Seeds
 

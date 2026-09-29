@@ -1,12 +1,12 @@
 topic,person_count,people,institutions,example_keywords
 atomic force microscopy,3,Gerhard Schütz; Orestis G. Andriotis; Philipp J. Thurner,TU Wien,atomic force microscopy
-biophysics,3,Cédrik Marius André Barutel; Roberto Cerbino; Thomas Juffmann,Max Perutz Labs / University of Vienna; TU Wien; University of Vienna,biophysics
-super-resolution microscopy,2,Gerhard Schütz; Jonas Ries,Max Perutz Labs / University of Vienna; TU Wien,super-resolution microscopy
+biophysics,3,Cédrik Marius André Barutel; Roberto Cerbino; Thomas Juffmann,Max Perutz Labs; TU Wien; University of Vienna,biophysics
+super-resolution microscopy,2,Gerhard Schütz; Jonas Ries,Max Perutz Labs; TU Wien,super-resolution microscopy
 t-cell signaling,2,Eva Sevcsik; Mario Brameshuber,TU Wien,t-cell signaling
 active materials,1,Cédrik Marius André Barutel,TU Wien,active materials
 active matter,1,Sebastian Fürthauer,TU Wien,active matter
-adaptive optics,1,Thomas Juffmann,Max Perutz Labs / University of Vienna,adaptive optics
-advanced microscopy,1,Jonas Ries,Max Perutz Labs / University of Vienna,advanced microscopy
+adaptive optics,1,Thomas Juffmann,Max Perutz Labs,adaptive optics
+advanced microscopy,1,Jonas Ries,Max Perutz Labs,advanced microscopy
 ai,1,Stefan Szeider,TU Wien,ai
 algorithmic encoding techniques,1,Tomáš Peitl,TU Wien,algorithmic encoding techniques
 algorithmics,1,Tomáš Peitl,TU Wien,algorithmics
@@ -20,7 +20,7 @@ and the design and analysis for,1,Jiehua Chen,TU Wien,and the design and analysi
 applications solving math problems,1,Tomáš Peitl,TU Wien,applications solving math problems
 artificial intelligence,1,Stefan Szeider,TU Wien,artificial intelligence
 biological matter,1,Christos N. Likos,University of Vienna,biological matter
-biological networks,1,Jörg Menche,Max Perutz Labs / University of Vienna,biological networks
+biological networks,1,Jörg Menche,Max Perutz Labs,biological networks
 biological systems,1,Roberto Cerbino,University of Vienna,biological systems
 biological tissues,1,Orestis G. Andriotis,TU Wien,biological tissues
 biomaterials,1,Philipp J. Thurner,TU Wien,biomaterials
@@ -30,10 +30,10 @@ branch and bound,1,Günther Raidl,TU Wien,branch and bound
 cell division,1,Sebastian Fürthauer,TU Wien,cell division
 cell motility,1,Sebastian Fürthauer,TU Wien,cell motility
 cell studies,1,Eva Sevcsik,TU Wien,cell studies
-cellular dynamics,1,Jonas Ries,Max Perutz Labs / University of Vienna,cellular dynamics
+cellular dynamics,1,Jonas Ries,Max Perutz Labs,cellular dynamics
 chess,1,Tomáš Peitl,TU Wien,chess
 cilia,1,Arun Ravi,TU Wien,cilia
-clathrin-mediated endocytosis,1,Jonas Ries,Max Perutz Labs / University of Vienna,clathrin-mediated endocytosis
+clathrin-mediated endocytosis,1,Jonas Ries,Max Perutz Labs,clathrin-mediated endocytosis
 coarse-grained simulation,1,Sofia Kantorovich,University of Vienna,coarse-grained simulation
 collagen,1,Philipp J. Thurner,TU Wien,collagen
 collagen fibril degradation,1,Orestis G. Andriotis,TU Wien,collagen fibril degradation
@@ -55,7 +55,7 @@ dqbf,1,Tomáš Peitl,TU Wien,dqbf
 dynamic programming,1,Günther Raidl,TU Wien,dynamic programming
 dynamical processes,1,Christoph Dellago,University of Vienna,dynamical processes
 eg network design and other problems on graphs,1,Günther Raidl,TU Wien,eg network design and other problems on graphs
-electron microscopy,1,Thomas Juffmann,Max Perutz Labs / University of Vienna,electron microscopy
+electron microscopy,1,Thomas Juffmann,Max Perutz Labs,electron microscopy
 exact optimization techniques,1,Günther Raidl,TU Wien,exact optimization techniques
 experimental soft matter physics,1,Roberto Cerbino,University of Vienna,experimental soft matter physics
 experimental tissue biomechanics,1,Philipp J. Thurner,TU Wien,experimental tissue biomechanics
@@ -74,26 +74,26 @@ in particular for graph drawing and network visualization computational geometry
 ki,1,Stefan Szeider,TU Wien,ki
 knowledge compilation boolean functions analysis proof systems,1,Alexis de Colnet,TU Wien,knowledge compilation boolean functions analysis proof systems
 knstliche intelligenz,1,Stefan Szeider,TU Wien,knstliche intelligenz
-light microscopy,1,Thomas Juffmann,Max Perutz Labs / University of Vienna,light microscopy
+light microscopy,1,Thomas Juffmann,Max Perutz Labs,light microscopy
 live-cell plasma membrane,1,Mario Brameshuber,TU Wien,live-cell plasma membrane
 living smart materials,1,Jakob Roland Schindelwig,TU Wien,living smart materials
-low-damage microscopy,1,Thomas Juffmann,Max Perutz Labs / University of Vienna,low-damage microscopy
+low-damage microscopy,1,Thomas Juffmann,Max Perutz Labs,low-damage microscopy
 machine learning,1,Stefan Szeider,TU Wien,machine learning
 machine learning approaches,1,Christoph Dellago,University of Vienna,machine learning approaches
 magnetic particle materials,1,Sofia Kantorovich,University of Vienna,magnetic particle materials
 magnetic soft matter,1,Sofia Kantorovich,University of Vienna,magnetic soft matter
-medicine,1,Jörg Menche,Max Perutz Labs / University of Vienna,medicine
+medicine,1,Jörg Menche,Max Perutz Labs,medicine
 membrane biophysics,1,Gerhard Schütz,TU Wien,membrane biophysics
 micro- and nanomechanics,1,Philipp J. Thurner,TU Wien,micro- and nanomechanics
 micro- and nanostructured biointerfaces,1,Eva Sevcsik,TU Wien,micro- and nanostructured biointerfaces
 microswimmers,1,Arun Ravi,TU Wien,microswimmers
-minflux,1,Jonas Ries,Max Perutz Labs / University of Vienna,minflux
+minflux,1,Jonas Ries,Max Perutz Labs,minflux
 molecular biophysics,1,Mario Brameshuber,TU Wien,molecular biophysics
-molecular networks,1,Jörg Menche,Max Perutz Labs / University of Vienna,molecular networks
+molecular networks,1,Jörg Menche,Max Perutz Labs,molecular networks
 my current cv,1,Christopher Bacher,TU Wien,my current cv
 my presentations and posters,1,Christopher Bacher,TU Wien,my presentations and posters
 nano- and microscale mechanics,1,Orestis G. Andriotis,TU Wien,nano- and microscale mechanics
-network theory,1,Jörg Menche,Max Perutz Labs / University of Vienna,network theory
+network theory,1,Jörg Menche,Max Perutz Labs,network theory
 neuroscience,1,Gerhard Schütz,TU Wien,neuroscience
 numerical physics,1,Sebastian Fürthauer,TU Wien,numerical physics
 organoids,1,Orestis G. Andriotis,TU Wien,organoids
@@ -106,9 +106,9 @@ polymers,1,Christos N. Likos,University of Vienna,polymers
 proof complexity,1,Tomáš Peitl,TU Wien,proof complexity
 qbf,1,Tomáš Peitl,TU Wien,qbf
 quantitative microscopy,1,Roberto Cerbino,University of Vienna,quantitative microscopy
-quantitative modelling,1,Jörg Menche,Max Perutz Labs / University of Vienna,quantitative modelling
-quantum imaging,1,Thomas Juffmann,Max Perutz Labs / University of Vienna,quantum imaging
-quantum optics,1,Thomas Juffmann,Max Perutz Labs / University of Vienna,quantum optics
+quantitative modelling,1,Jörg Menche,Max Perutz Labs,quantitative modelling
+quantum imaging,1,Thomas Juffmann,Max Perutz Labs,quantum imaging
+quantum optics,1,Thomas Juffmann,Max Perutz Labs,quantum optics
 rare event simulation,1,Christoph Dellago,University of Vienna,rare event simulation
 sat,1,Tomáš Peitl,TU Wien,sat
 self-assembly in soft matter,1,Christoph Dellago,University of Vienna,self-assembly in soft matter
@@ -116,7 +116,7 @@ simulation algorithms,1,Christoph Dellago,University of Vienna,simulation algori
 single dye tracing,1,Mario Brameshuber,TU Wien,single dye tracing
 single molecule fluorescence,1,Mario Brameshuber,TU Wien,single molecule fluorescence
 single molecule microscopy,1,Gerhard Schütz,TU Wien,single molecule microscopy
-single-molecule localization,1,Jonas Ries,Max Perutz Labs / University of Vienna,single-molecule localization
+single-molecule localization,1,Jonas Ries,Max Perutz Labs,single-molecule localization
 soft matter,1,Sofia Kantorovich,University of Vienna,soft matter
 soft matter simulation,1,Christos N. Likos,University of Vienna,soft matter simulation
 soft matter theory,1,Christos N. Likos,University of Vienna,soft matter theory
@@ -125,12 +125,12 @@ solving algorithmic problems arising in various application domains,1,Günther R
 statistical mechanics,1,Christos N. Likos,University of Vienna,statistical mechanics
 stefan szeider algorithms,1,Stefan Szeider,TU Wien,stefan szeider algorithms
 stochastic thermodynamics,1,Christoph Dellago,University of Vienna,stochastic thermodynamics
-structural cell biology,1,Jonas Ries,Max Perutz Labs / University of Vienna,structural cell biology
+structural cell biology,1,Jonas Ries,Max Perutz Labs,structural cell biology
 structure-function relationships,1,Philipp J. Thurner,TU Wien,structure-function relationships
 super-resolution fluorescence,1,Orestis G. Andriotis,TU Wien,super-resolution fluorescence
 super-resolution fluorescence microscopy,1,Eva Sevcsik,TU Wien,super-resolution fluorescence microscopy
 synchronization,1,Arun Ravi,TU Wien,synchronization
-systems biology,1,Jörg Menche,Max Perutz Labs / University of Vienna,systems biology
+systems biology,1,Jörg Menche,Max Perutz Labs,systems biology
 theoretical biophysics,1,Sebastian Fürthauer,TU Wien,theoretical biophysics
 transportation optimization,1,Günther Raidl,TU Wien,transportation optimization
 uncategorized,1,Christopher Bacher,TU Wien,uncategorized
