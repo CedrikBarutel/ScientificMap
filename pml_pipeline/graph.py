@@ -5,6 +5,7 @@ import csv
 from itertools import combinations
 from typing import Iterable
 
+from .curation import refine_people_metadata
 from .html_maps import render_tool
 from .models import Edge, Person, TOPIC_FIELDS, normalize_keyword, normalize_name
 from .storage import MAPS_DIR, RAW_DIR, read_people, read_publications, topics_csv_path, write_edges, write_people
@@ -196,7 +197,7 @@ def write_cluster_report(people: list[Person], edges: list[Edge]) -> None:
 
 
 def build_graph_outputs() -> list[Edge]:
-    people = merge_manual_people(read_people())
+    people = refine_people_metadata(merge_manual_people(read_people()))
     write_people(people)
     edges = []
     edges.extend(same_institution_edges(people))
