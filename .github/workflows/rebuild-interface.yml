@@ -1,0 +1,64 @@
+name: Rebuild ScientificMap interface
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Apply interface update
+        shell: bash
+        run: |
+          base64 -d .github/update/html_maps.py.xz.b64 | xz -d > pml_pipeline/html_maps.py
+          python - <<'PY'
+          from pathlib import Path
+
+          graph = Path("pml_pipeline/graph.py")
+          text = graph.read_text()
+          text = text.replace("from .html_maps import render_map", "from .html_maps import render_tool")
+          text = text.replace(
+              '    render_map(people, edges, "institution", "Academic Network by Institution", MAPS_DIR / "institution_map.html")\n'
+              '    render_map(people, edges, "keyword", "Academic Network by Research Topic", MAPS_DIR / "research_map.html")\n',
+              '    render_tool(people, edges, MAPS_DIR / "scientific_map.html")\n'
+          )
+          graph.write_text(text)
+
+          readme = Path("README.md")
+          text = readme.read_text()
+          start = text.index("## View the maps")
+          end = text.index("## Quick start")
+          replacement = """## View ScientificMap
+
+No local download is needed. Open the combined interactive tool directly from the GitHub repository through HTMLPreview:
+
+- [Open ScientificMap](https://htmlpreview.github.io/?https://github.com/CedrikBarutel/ScientificMap/blob/main/maps/scientific_map.html)
+
+The Explorer lets you switch between **Institution** and **Topic** views and includes pan, wheel zoom, +/- zoom, Fit visible, Reset, search, group filtering, and label controls. The same page also includes **Add info** and **Algorithms** tabs.
+
+"""
+          readme.write_text(text[:start] + replacement + text[end:])
+          PY
+
+          rm -f maps/institution_map.html maps/research_map.html
+          python3 script.py build-graph
+          rm -rf .github/update
+          rm -f .github/workflows/rebuild-interface.yml
+
+      - name: Commit interface update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Combine maps into interactive ScientificMap tool"
+          git push
