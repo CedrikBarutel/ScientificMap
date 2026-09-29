@@ -1,0 +1,37 @@
+name: Regenerate unified map
+
+on:
+  push:
+    paths:
+      - '.github/workflows/regenerate-unified-map.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate Python
+        run: |
+          python -m py_compile pml_pipeline/html_maps.py pml_pipeline/graph.py
+
+      - name: Regenerate map
+        run: |
+          python -c "from pml_pipeline.graph import build_graph_outputs; build_graph_outputs()"
+          rm -f maps/institution_map.html maps/research_map.html
+          rm -f .github/workflows/regenerate-unified-map.yml
+
+      - name: Commit generated map
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Regenerate unified network map"
+          git push
